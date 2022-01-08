@@ -1,0 +1,22 @@
+{
+  "name": "bonglim-h",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Banana0910/bonglim-h.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Banana0910/bonglim-h/issues"
+  },
+  "homepage": "https://github.com/Banana0910/bonglim-h#readme",
+  "dependencies": {
+    "discord.js": "^13.5.1"
+  }
+}
