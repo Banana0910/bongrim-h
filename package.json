@@ -17,6 +17,11 @@
   },
   "homepage": "https://github.com/Banana0910/bonglim-h#readme",
   "dependencies": {
+    "@discordjs/rest": "^0.2.0-canary.0",
+    "axios": "^0.24.0",
+    "cheerio": "^1.0.0-rc.10",
+    "discord-api-types": "^0.26.1",
+    "discord-slash-commands-client": "^1.2.2",
     "discord.js": "^13.5.1"
   }
 }
