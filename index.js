@@ -22,11 +22,11 @@ async function getinformation() {
     const html = await axios.get(`http://bongrim-h.gne.go.kr/bongrim-h/dv/dietView/selectDietDetailView.do?dietDate=${date[2]}/${date[0]}/${date[1]}`);
 
     const $ = che.load(html.data);
-    meal = $("#subContent > div > div:nth-child(7) > div.BD_table > table > tbody > tr:nth-child(2) > td").html()
+    meal = $("#subContent > div > div:nth-child(7) > div:nth-child(5) > table > tbody > tr:nth-child(2) > td").html()
         .replace(/<br\s*[\/]?>/gi, '\n') // <br> 태그를 줄바꿈으로
         .replace(/[0-9\\.]/gi, '') // 숫자랑 점들 전부 공백으로 바꾸기
         .trim(); // 봉림고는 괄호로 된 급식 기호가 없음 그렇기에 그냥 앞뒤 공백만 달리자
-    calorie = $("#subContent > div > div:nth-child(7) > div.BD_table > table > tbody > tr:nth-child(4) > td").text().trim();
+    calorie = $("#subContent > div > div:nth-child(7) > div:nth-child(5) > table > tbody > tr:nth-child(4) > td").text().trim();
 }
 
 async function getschoolmeal(year,month,day) {
@@ -36,11 +36,11 @@ async function getschoolmeal(year,month,day) {
     const html = await axios.get(`http://bongrim-h.gne.go.kr/bongrim-h/dv/dietView/selectDietDetailView.do?dietDate=${year}/${month}/${day}`);
 
     const $ = che.load(html.data);
-    const meal = $("#subContent > div > div:nth-child(7) > div.BD_table > table > tbody > tr:nth-child(2) > td").html()
+    const meal = $("#subContent > div > div:nth-child(7) > div:nth-child(5) > table > tbody > tr:nth-child(2) > td").html()
         .replace(/<br\s*[\/]?>/gi, '\n') // <br> 태그를 줄바꿈으로
         .replace(/[0-9\\.]/gi, '') // 숫자랑 점들 전부 공백으로 바꾸기
         .trim(); // 봉림고는 괄호로 된 급식 기호가 없음 그렇기에 그냥 앞뒤 공백만 달리자
-    const calorie= $("#subContent > div > div:nth-child(7) > div.BD_table > table > tbody > tr:nth-child(4) > td").text().trim();
+    const calorie= $("#subContent > div > div:nth-child(7) > div:nth-child(5) > table > tbody > tr:nth-child(4) > td").text().trim();
     return { meal: meal, calorie: calorie};
 }
 
@@ -54,9 +54,6 @@ bot.on('interactionCreate', async interaction => {
         try { await interaction.reply(`명령 : \`${cmd}\`\n\`\`\`${eval(cmd).toString()}\`\`\``); }
         catch (e) { await interaction.reply(`명령 : \`${cmd}\`\n${e}`); }
     }
-    else if (interaction.commandName === 'ping') {
-        await interaction.reply('쿠쿠루***핑퐁***이다 ㅋㄹㅋㄹ')
-    }
     else if (interaction.commandName === 'getinf') {
         getinformation();
         await interaction.reply("정보 수집 성공");
@@ -64,7 +61,7 @@ bot.on('interactionCreate', async interaction => {
     else if (interaction.commandName === 'show') {
         const today = new Date().toLocaleString("en", { year: "numeric",month: "2-digit", day: "numeric" }).split('/');
         await interaction.reply({
-            embeds: [embed(`${today[2]}년 ${today[0]}월 ${today[1]}일 급식`, `${(meal === "") ? "오늘은 급식이 없습니다" : meal}\n\n**[칼로리 : ${(calorie === "") ? "0 Kcal" : calorie}]**`)]
+            embeds: [embed(`${today[2]}년 ${today[0]}월 ${today[1]}일 급식`, `${(meal === "") ? "오늘은 급식이 없습니다" : meal}\n\n**[칼로리 : ${(calorie === "Kcal") ? "0 Kcal" : calorie}]**`)]
         });
     }
     else if (interaction.commandName === 'schoolmeal') {
