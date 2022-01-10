@@ -17,16 +17,19 @@ function embed(title, descirption) {
 async function getinformation() {
     const che = require('cheerio');
     const axios = require('axios');
-    
     const date = new Date().toLocaleString("en", { year: "numeric",month: "2-digit", day: "numeric" }).split('/');
-    const html = await axios.get(`http://bongrim-h.gne.go.kr/bongrim-h/dv/dietView/selectDietDetailView.do?dietDate=${date[2]}/${date[0]}/${date[1]}`);
-
-    const $ = che.load(html.data);
-    meal = $("#subContent > div > div:nth-child(7) > div:nth-child(5) > table > tbody > tr:nth-child(2) > td").html()
-        .replace(/<br\s*[\/]?>/gi, '\n') // <br> 태그를 줄바꿈으로
-        .replace(/[0-9\\.]/gi, '') // 숫자랑 점들 전부 공백으로 바꾸기
-        .trim(); // 봉림고는 괄호로 된 급식 기호가 없음 그렇기에 그냥 앞뒤 공백만 달리자
-    calorie = $("#subContent > div > div:nth-child(7) > div:nth-child(5) > table > tbody > tr:nth-child(4) > td").text().trim();
+    
+    try {
+        const html = await axios.get(`http://bongrim-h.gne.go.kr/bongrim-h/dv/dietView/selectDietDetailView.do?dietDate=${date[2]}/${date[0]}/${date[1]}`);
+        const $ = che.load(html.data);
+        meal = $("#subContent > div > div:nth-child(7) > div:nth-child(5) > table > tbody > tr:nth-child(2) > td").html()
+            .replace(/<br\s*[\/]?>/gi, '\n') // <br> 태그를 줄바꿈으로
+            .replace(/[0-9\\.]/gi, '') // 숫자랑 점들 전부 공백으로 바꾸기
+            .trim(); // 봉림고는 괄호로 된 급식 기호가 없음 그렇기에 그냥 앞뒤 공백만 달리자
+        calorie = $("#subContent > div > div:nth-child(7) > div:nth-child(5) > table > tbody > tr:nth-child(4) > td").text().trim();
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 async function getschoolmeal(year,month,day) {
@@ -41,7 +44,7 @@ async function getschoolmeal(year,month,day) {
         .replace(/[0-9\\.]/gi, '') // 숫자랑 점들 전부 공백으로 바꾸기
         .trim(); // 봉림고는 괄호로 된 급식 기호가 없음 그렇기에 그냥 앞뒤 공백만 달리자
     const calorie= $("#subContent > div > div:nth-child(7) > div:nth-child(5) > table > tbody > tr:nth-child(4) > td").text().trim();
-    return { meal: meal, calorie: calorie};
+    return { meal: meal, calorie: calorie };
 }
 
 bot.once('ready', () =>  console.log(`${bot.user.tag}로 로그인 함!`));
