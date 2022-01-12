@@ -2,7 +2,7 @@ const { Client } = require("discord-slash-commands-client");
 const { token, client_id } = require("./config.json")
 
 const client = new Client(token, client_id);
-const guild_id = "783625320062386217"
+const guild_id = "758758978078769233"
 
 client.createCommand({
     name: "eval",
@@ -16,24 +16,6 @@ client.createCommand({
         }
     ]
 }, guild_id).then(console.log);
-
-client.createCommand({
-    name: "ping",
-    description: "ping pong!",
-}).then(console.log);
-
-client.createCommand({
-    name: "eval",
-    description: "javascript 명령을 실행합니다.",
-    options: [
-        {
-            name: "명령어",
-            description: "실행할 명령어를 입력하면 됩니다.",
-            required: true,
-            type: 3,
-        }
-    ]
-}).then(console.log);
 
 client.createCommand({
     name: "getinf",
@@ -72,6 +54,33 @@ client.createCommand({
             type: 4,
             min_value: 1,
             max_value: 31,
+        }
+    ]
+}, guild_id).then(console.log);
+
+client.createCommand({
+    name: "set",
+    description: "타겟 채널을 설정합니다.",
+    options: [
+        {
+            name: "채널",
+            description: "실행할 채널의 ID를 입력하시면 됩니다.",
+            required: false,
+            type: 7,
+            channel_types: 0,
+        }
+    ]
+}, guild_id).then(console.log);
+
+client.createCommand({
+    name: "sendmsg",
+    description: "타겟 채널에 메시지를 전송합니다.",
+    options: [
+        {
+            name: "메시지",
+            description: "보낼 메시지를 입력합니다",
+            required: true,
+            type: 3,
         }
     ]
 }, guild_id).then(console.log);
