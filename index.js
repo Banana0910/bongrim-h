@@ -12,6 +12,8 @@ let today_dinner = {
     calorie: "",
 }
 
+let target_channel = undefined;
+
 function embed(title, descirption) {
     const { MessageEmbed } = require('discord.js');
     return new MessageEmbed()
@@ -81,23 +83,30 @@ bot.once('ready', () =>  {
 bot.on('interactionCreate', async interaction => {
 	if (!interaction.isCommand()) return;
 
-    if (interaction.commandName === 'eval') {
+    if (interaction.commandName === 'set') {
+        let channel = interaction.options.getChannel("채널");
+        if (channel == null) channel = interaction.channel;
+        target_channel = channel.id;
+        await interaction.reply(`채널 ${channel.name}으로 설정되었습니다`);
+    }
+    else if (interaction.commandName === 'eval') {
         const cmd = interaction.options.getString("명령어");
         try { await interaction.reply(`명령 : \`${cmd}\`\n\`\`\`${eval(cmd).toString()}\`\`\``); }
         catch (e) { await interaction.reply(`명령 : \`${cmd}\`\n${e}`); }
     }
     else if (interaction.commandName === 'getinf') {
-        getinformation();
-        await interaction.reply("정보 수집 성공");
+        await interaction.reply("정보 수집 중..");
+        await getinformation();
+        await interaction.editReply("정보 수집 성공");
     }
     else if (interaction.commandName === 'show') {
         const today = new Date().toLocaleString("en", { year: "numeric",month: "2-digit", day: "numeric" }).split('/');
         const { MessageEmbed } = require('discord.js');
         const embed = new MessageEmbed().setTitle(`${today[2]}년 ${today[0]}월 ${today[1]}일 급식`).setColor("0x139BCC");
         if (today_lunch.meal != undefined) {
-            embed.addField("중식", `${today_lunch.meal}\n\n**[칼로리 : ${today_lunch.calorie}]**`);
+            embed.addField("──────────────\n중식 (Lunch)\n──────────────", `${today_lunch.meal}\n**[칼로리 : ${today_lunch.calorie}]**\n`);
             if (today_dinner.meal != undefined) {
-                embed.addField("석식", `${today_dinner.meal}\n\n**[칼로리 : ${today_dinner.calorie}]**`);
+                embed.addField("──────────────\n석식 (Dinner)\n──────────────", `${today_dinner.meal}\n**[칼로리 : ${today_dinner.calorie}]**`);
             }
         }
         else {
@@ -110,23 +119,33 @@ bot.on('interactionCreate', async interaction => {
         const month = interaction.options.getInteger("월").toString().padStart(2,'0');
         const day = interaction.options.getInteger("일").toString().padStart(2,'0');
 
+        await interaction.reply(`${year}년 ${month}월 ${day}일 급식을 가져오는 중..`);
+
         const target_inf = await getschoolmeal(year,month,day);
         if (target_inf.lunch.meal != undefined) {
             const { MessageEmbed } = require('discord.js');
             const embed = new MessageEmbed().setTitle(`${year}년 ${month}월 ${day}일 급식`).setColor("0x139BCC");
-            embed.addField("중식", `${target_inf.lunch.meal}\n\n**[칼로리 : ${target_inf.lunch.calorie}]**`);
+            embed.addField("──────────────\n중식 (Lunch)\n──────────────", `${target_inf.lunch.meal}\n**[칼로리 : ${target_inf.lunch.calorie}]**`,true);
             if (target_inf.dinner.meal != undefined) {
-                embed.addField("석식", `${target_inf.dinner.meal}\n\n**[칼로리 : ${target_inf.dinner.calorie}]**`);
+                embed.addField("──────────────\n석식 (Dinner)\n──────────────", `${target_inf.dinner.meal}\n**[칼로리 : ${target_inf.dinner.calorie}]**`, true);
             }
-            await interaction.reply({ embeds: [embed] });
+            await interaction.editReply({ content: "성공!", embeds: [embed] });
         } else {
-            await interaction.reply(`${year}년 ${month}월 ${day}일에는 급식이 없네요..`);
+            await interaction.editReply(`${year}년 ${month}월 ${day}일에는 급식이 없네요..`);
         }
     }
 });
 
+const activity_list = ["테스트", "자살"];
+let turn = 0
+
 function chanege_activity() {
-    
+    bot.user.setActivity(activity_list[turn], { type: "PLAYING" });
+    if (turn == 1) {
+        turn = 0;
+    } else {
+        turn = 1;
+    }
 }
 
 bot.login(token);
