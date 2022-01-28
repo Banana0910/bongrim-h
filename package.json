@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node --max-old-space-size=12000 index.js"
   },
   "repository": {
     "type": "git",
@@ -17,10 +17,16 @@
   },
   "homepage": "https://github.com/Banana0910/bonglim-h#readme",
   "dependencies": {
+    "@discordjs/opus": "^0.5.3",
+    "@discordjs/voice": "^0.8.0",
     "axios": "^0.24.0",
     "cheerio": "^1.0.0-rc.10",
     "discord-slash-commands-client": "^1.2.2",
     "discord.js": "^13.5.1",
-    "googleapis": "^39.2.0"
+    "ffmpeg": "^0.0.4",
+    "ffmpeg-static": "^4.4.1",
+    "googleapis": "^39.2.0",
+    "libsodium-wrappers": "^0.7.9",
+    "ytdl-core": "^4.10.0"
   }
 }
