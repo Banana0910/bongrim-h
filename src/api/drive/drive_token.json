@@ -1,0 +1,13 @@
+{
+    "client_id":"620578846990-dhnjc19tnd3a1njb3m6hdvggdb8niqab.apps.googleusercontent.com",
+    "client_secret":"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",
+    "redirect_uris":["urn:ietf:wg:oauth:2.0:oob","http://localhost"],
+    "token":
+    {
+        "access_token":"ya29.A0ARrdaM8mZwQctmRFEtdK5lpL5GUmSc4O30PLE0ZqF98f86cFaDoAxLKN9ilCguf6mGgRI5feF4nH3Dr3KpJDOkJwpoMp10Nx-d3VCEf863Hr9_XZ8k7tHqPqPInPfNdNYtH_5MxigxJldmARd96z1AVxXdrb",
+        "refresh_token":"1//0euN1_CUp8p-5CgYIARAAGA4SNwF-L9Irk5zxD73rn8eL4ckpDhuh7AqIY7bn1RZfN-7RHkHTZOGpVraFFl9mEUiS7rFqm-zZ-aE",
+        "scope":"https://www.googleapis.com/auth/drive",
+        "token_type":"Bearer",
+        "expiry_date":1643469936781
+    }
+}

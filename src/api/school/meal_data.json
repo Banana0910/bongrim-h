@@ -1,0 +1,14 @@
+{
+    "today":
+    {
+        "date" : {},
+        "lunch": {},
+        "dinner": {}
+    },
+    "nextday":
+    {
+        "date" : {},
+        "lunch": {},
+        "dinner": {}
+    }
+}
