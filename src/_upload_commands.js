@@ -1,5 +1,5 @@
 const { Client } = require("discord-slash-commands-client");
-const { token, client_id } = require("../data/config.json")
+const { token, client_id } = require("./data/config.json")
 
 const client = new Client(token, client_id);
 const guild_id = "758758978078769233"
@@ -22,10 +22,28 @@ const guild_id = "758758978078769233"
 //     description: "급식 정보를 가져옵니다.",
 // }, guild_id).then(console.log);
 
-// client.createCommand({
-//     name: "show",
-//     description: "급식 정보를 보여줍니다.",
-// }, guild_id).then(console.log);
+client.createCommand({
+    name: "show",
+    description: "급식 정보를 보여줍니다.",
+    options: [
+        {
+            name: "날",
+            description: "보고 싶은 날의 급식을 봅니다.",
+            required: true,
+            type: 3,
+            choices: [
+                {
+                    name: "오늘",
+                    value: "today",
+                },
+                {
+                    name: "내일",
+                    value: "next",
+                }
+            ]
+        }
+    ]
+}, guild_id).then(console.log);
 
 // client.createCommand({
 //     name: "schoolmeal",

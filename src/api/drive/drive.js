@@ -3,7 +3,7 @@ const { google } = require('googleapis');
 const { client_secret, client_id, redirect_uris, token } = require('./drive_token.json');
 
 const FILE_ID = '1aaxNC7KDN-GzJo-rsNtngW04bRCabKJs';
-const TARGET_PATH = "../data/data.json"
+const TARGET_PATH = "/src/data/data.json"
 
 const oauth2Client = new google.auth.OAuth2(
     client_id, client_secret, redirect_uris[0]);
@@ -28,8 +28,9 @@ function json_download()
     });
 }
 
-function json_update()
+function json_update(data)
 {
+    fs.writeFileSync(TARGET_PATH, JSON.stringify(data))
     const drive = google.drive({version: 'v3', auth: oauth2Client});
     drive.files.update({ 
         fileId: FILE_ID, 
