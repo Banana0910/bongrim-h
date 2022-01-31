@@ -73,9 +73,8 @@ function meal_embed(data) {
             color: "0x139BCC"
         });
         embed.addField("──────────────\n중식 (Lunch)\n──────────────", `${data.lunch.meal}\n**[칼로리 : ${data.lunch.calorie}]**`,true);
-        if (data.dinner) {
+        if (data.dinner)
             embed.addField("──────────────\n석식 (Dinner)\n──────────────", `${data.dinner.meal}\n**[칼로리 : ${data.dinner.calorie}]**`, true);
-        }
         return embed;
     } else {
         const embed = new MessageEmbed({

@@ -25,6 +25,10 @@ async function play_embed(interaction, info, volume, loop, btn) {
     });
 }
 
+/**
+ * @param {CommandInteraction} interaction
+ */
+
 async function play_youtube(interaction, vol, url) {
     const user_channel = interaction.guild.members.cache.get(interaction.user.id).voice.channel;
     if (!user_channel) {
