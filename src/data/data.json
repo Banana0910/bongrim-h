@@ -1,3 +1,14 @@
 {
-    "guilds" : ["1234"]
+    "guilds": {
+        "758758978078769233": {
+            "target_channels": [
+                "758758978078769236"
+            ],
+            "log_channels": []
+        },
+        "783625320062386217": {
+            "target_channels": [],
+            "log_channels": []
+        }
+    }
 }

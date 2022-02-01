@@ -1,5 +1,2 @@
-.env
-node_modules
-config.json
-token.json
-credentials.json
+/src/data/config.json
+/node_modules

@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node --max-old-space-size=12000 src/index.js"
+    "start": "forever start src/index.js",
+    "stop": "forever stop src/index.js",
+    "test": "forever list"
   },
   "repository": {
     "type": "git",
@@ -25,6 +27,7 @@
     "discord.js": "^13.5.1",
     "ffmpeg": "^0.0.4",
     "ffmpeg-static": "^4.4.1",
+    "forever": "^4.0.3",
     "googleapis": "^39.2.0",
     "libsodium-wrappers": "^0.7.9",
     "ytdl-core": "^4.10.0"

@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { MessageEmbed } = require('discord.js');
 const che = require('cheerio');
 const axios = require('axios');
@@ -42,13 +43,13 @@ function getmeal(year, month, day) {
 
 function gettoday() {
     return new Promise((resolve, reject) => {
-        let data = { today: "None", nextday: "None" };
+        let data = { today: {}, nextday: {} };
         const today = new Date();
         const today_splited = today.toLocaleString("en", { year: "numeric", month: "2-digit", day: "numeric" }).split('/');
         getmeal(today_splited[2], today_splited[0], today_splited[1]).then((res) => {
             data.today = res;
         }).catch((err) => {
-            (err == "no meal") ? (data.today = "None") : reject();
+            (err == "no meal") ? (!data.today) : reject();
         });
         let nextday = new Date();
         nextday.setDate(today.getDate() + 1);
@@ -58,7 +59,7 @@ function gettoday() {
             const nextday_splited = nextday.toLocaleString("en", { year: "numeric", month: "2-digit", day: "numeric" }).split('/');
             getmeal(nextday_splited[2], nextday_splited[0], nextday_splited[1]).then((res) => {
                 data.nextday = res;
-                resolve();
+                fs.writeFile('meal_data.json', JSON.stringify(data),resolve);
             }).catch((err) => {
                 (err == "no meal") ? nextday.setDate(nextday.getDate() + 1) : reject(err);
             });
@@ -72,9 +73,9 @@ function meal_embed(data) {
             title: `${data.date.year}년 ${data.date.month}월 ${data.date.day}일 급식`,
             color: "0x139BCC"
         });
-        embed.addField("──────────────\n중식 (Lunch)\n──────────────", `${data.lunch.meal}\n**[칼로리 : ${data.lunch.calorie}]**`,true);
+        embed.addField(`──────────────\n중식 (Lunch) (${data.lunch.calorie})\n──────────────`, data.lunch.meal,true);
         if (data.dinner)
-            embed.addField("──────────────\n석식 (Dinner)\n──────────────", `${data.dinner.meal}\n**[칼로리 : ${data.dinner.calorie}]**`, true);
+            embed.addField(`──────────────\n석식 (Dinner) (${data.lunch.calorie})\n──────────────`, data.dinner.meal, true);
         return embed;
     } else {
         const embed = new MessageEmbed({
