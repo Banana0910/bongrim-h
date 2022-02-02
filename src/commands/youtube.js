@@ -88,12 +88,10 @@ async function play_youtube(channel, interaction, vol, url) {
                 i.deferUpdate();
                 volume += 0.1
                 resource.volume.setVolume(volume);
-                i.component.setDisabled((volume < 1.0) ? false : true) ;
                 break;
             case "vol_down" :
                 i.deferUpdate();
                 resource.volume.setVolume(volume -= 0.1);
-                i.component.setDisabled((volume > 0.0) ? false : true) ;
                 break;
             case "stop" :
                 i.deferUpdate();
@@ -107,6 +105,8 @@ async function play_youtube(channel, interaction, vol, url) {
                 await i.deferUpdate();
                 player.stop();
         }
+        btn.components[2].setDisabled((volume < 1.0) ? false : true);
+        btn.components[3].setDisabled((volume > 0.0) ? false : true);
         const info = playlist[interaction.guild.id][0].info;
         await play_embed(interaction, info, volume, loop, btn);
     });

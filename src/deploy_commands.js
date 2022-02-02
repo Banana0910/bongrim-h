@@ -227,24 +227,41 @@ const guild_id = "783625320062386217"
 // }, guild_id).then(console.log);
 
 client.createCommand({
-    name: "status",
+    name: "stats",
     description: "서버 상태를 채널에 등록합니다.",
-}, guild_id).then(console.log);
-
-client.createCommand({
-    name: "eval",
-    description: "JavaScript 코드를 실행합니다.",
     options: [
         {
-            name: "코드",
-            description: "실행할 코드를 입력합니다",
-            type: 3,
-            required: true,
+            name: "상태",
+            description: "서버 상태 기능이 온오프 여부를 알려줍니다.",
+            type: 1
+        },
+        {
+            name: "리셋",
+            description: "서버 상태를 리셋합니다.",
+            type: 1
+        },
+        {
+            name: "활성화",
+            description: "서버 상태 기능을 활성화 합니다.",
+            type: 1
+        },
+        {
+            name: "비활성화",
+            description: "서버 상태 기능을 비활성화 합니다.",
+            type: 1
         }
     ]
 }, guild_id).then(console.log);
 
-// const delete_command_list = [ "936911163143368734", "936911216683651102", "936264361075429386"];
-// delete_command_list.map(command => {
-//     client.deleteCommand(command, guild_id).then(console.log);
-// });
+// client.createCommand({
+//     name: "eval",
+//     description: "JavaScript 코드를 실행합니다.",
+//     options: [
+//         {
+//             name: "코드",
+//             description: "실행할 코드를 입력합니다",
+//             type: 3,
+//             required: true,
+//         }
+//     ]
+// }, guild_id).then(console.log);

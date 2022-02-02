@@ -8,7 +8,13 @@
         },
         "783625320062386217": {
             "target_channels": [],
-            "log_channels": []
+            "log_channels": [],
+            "stats": {
+                "category": "938058974564073553",
+                "all_channel": "938058975742681089",
+                "user_channel": "938058976996777994",
+                "bot_channel": "938058978162774016"
+            }
         }
     }
 }

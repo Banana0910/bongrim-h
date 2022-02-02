@@ -1,2 +1,6 @@
-/src/data/config.json
 /node_modules
+
+# 토큰들
+/src/data/config.json
+/src/drive/drive_token.json
+/src/drive/youtube.token.json
