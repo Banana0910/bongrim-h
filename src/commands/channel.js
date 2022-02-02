@@ -21,9 +21,9 @@ module.exports = {
                 } 
             } else {
                 if (data.guilds[interaction.guild.id].target_channels.indexOf(channel_id) != -1) {
-                    data.guilds[interaction.guild.id].target_channels.push(channel_id);
-                    await interaction.reply(`**${interaction.channel.name}** 채널이 타깃채널에서 삭제되었습니다.`);
+                    data.guilds[interaction.guild.id].target_channels.pop(channel_id);
                     json_update(data);
+                    await interaction.reply(`**${interaction.channel.name}** 채널이 타깃채널에서 삭제되었습니다.`);
                 } else {
                     await interaction.reply("이 채널은 등록된 적이 없는데요?");
                 } 
@@ -39,7 +39,7 @@ module.exports = {
                 } 
             } else {
                 if (data.guilds[interaction.guild.id].log_channels.indexOf(channel_id) != -1) {
-                    data.guilds[interaction.guild.id].log_channels.push(channel_id);
+                    data.guilds[interaction.guild.id].log_channels.pop(channel_id);
                     json_update(data);
                     await interaction.reply(`**${interaction.channel.name}** 채널이 로그채널에서 삭제되었습니다.`);
                 } else {

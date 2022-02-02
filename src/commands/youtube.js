@@ -181,7 +181,7 @@ module.exports = {
             interaction.channel.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 60000 })
                 .then(async _interaction => {
                     await _interaction.deferReply();
-                    play_youtube(user_channel, _interaction, 10, `https://www.youtube.com/watch?v=${_interaction.values[0]}`);
+                    play_youtube(user_channel, _interaction, interaction.options.getInteger("음량"), `https://www.youtube.com/watch?v=${_interaction.values[0]}`);
                 })
                 .catch(async (err) => {
                     if (err) {

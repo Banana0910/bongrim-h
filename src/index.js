@@ -1,15 +1,15 @@
 const fs = require('fs');
 const { json_download, json_update } = require('./api/drive/drive');
-const { Client, Intents, Collection, MessageEmbed, GuildMemberManager } = require('discord.js');
+const { Client, Intents, Collection, MessageEmbed } = require('discord.js');
 const { token } = require('./data/config.json');
 
 const bot = new Client({ 
     intents: [
         Intents.FLAGS.GUILDS, 
+        Intents.FLAGS.GUILD_MEMBERS,
         Intents.FLAGS.GUILD_MESSAGES,
         Intents.FLAGS.GUILD_VOICE_STATES,
         Intents.FLAGS.GUILD_PRESENCES,
-        Intents.FLAGS.GUILD_INVITES,
     ] 
 });
 
@@ -20,7 +20,10 @@ async function send_log(msg) {
         data.guilds[guild].log_channels.map(channel => channels.push(channel));
     }));
     channels.map(channel => {
-        bot.channels.cache.get(channel).send(msg);
+        const log_channel = bot.channels.cache.get(channel);
+        if (log_channel) {
+            bot.channels.cache.get(channel).send(msg);
+        }
     })
 
 }
@@ -29,12 +32,19 @@ function stats_update(guild) {
     const data = require('./data/data.json');
     if (data.guilds[guild.id].stats) {
         const stats = data.guilds[guild.id].stats
-        guild.channels.cache.get(stats.all_channel)
-            .setName(`린민전체-${guild.members.cache.size}`);
-        guild.channels.cache.get(stats.user_channel)
-            .setName(`동무-${guild.members.cache.filter(m => !m.user.bot).size}`);
-        guild.channels.cache.get(stats.bot_channel)
-            .setName(`로보트-${guild.members.cache.filter(m => m.user.bot).size}`);
+        const all_channel = guild.channels.cache.get(stats.all_channel);
+        const user_channel = guild.channels.cache.get(stats.user_channel);
+        const bot_channel = guild.channels.cache.get(stats.bot_channel)
+
+        if (!all_channel || !user_channel || !bot_channel) {
+            delete data.guilds[guild.id].stats;
+            json_update(data);
+            return;
+        }
+
+        all_channel.setName(`린민전체-${guild.members.cache.size}`);
+        user_channel.setName(`동무-${guild.members.cache.filter(m => !m.user.bot).size}`);
+        bot_channel.setName(`로보트-${guild.members.cache.filter(m => m.user.bot).size}`);
     }
 }
 
@@ -79,35 +89,48 @@ bot.on('interactionCreate', async interaction => {
 	}
 });
 
-bot.on('messageCreate', (msg) =>{
+bot.on('messageCreate', async (msg) =>{
     const emoji = msg.content.match(/<:\w+:\d+>/gi);
     const content = msg.content.replace(/<:\w+:\d+>/gi, '');
     if (emoji) {
         const emoji_id = emoji.map((e) => e.split(':')[2].match(/\d+/)[0]);
-        msg.guild.emojis.fetch(emoji_id)
-            .then((emoji) => {
-                msg.channel.send({ embeds: [new MessageEmbed({
-                    author: {
-                        name: msg.member.displayName,
-                        iconURL: msg.member.displayAvatarURL(),
-                    },
-                    image: { url: `${emoji.url}?size=1024`},
-                    color: msg.member.displayHexColor,
-                    description: (content) ? content : ""
-                })]});
-                msg.delete();
-            })
-            .catch(console.error);
+        await Promise.all(emoji_id.map((id) => {
+            msg.guild.emojis.fetch(id)
+                .then((emoji) => {
+                    msg.channel.send({ embeds: [new MessageEmbed({
+                        author: {
+                            name: msg.member.displayName,
+                            iconURL: msg.member.displayAvatarURL(),
+                        },
+                        image: { url: `${emoji.url}?size=1024`},
+                        color: msg.member.displayHexColor,
+                        description: (content) ? content : ""
+                    })]});
+                })
+                .catch(console.error);
+        }));
+        msg.delete();
     }
 });
 
-bot.on('guildMemberAdd', (member) => {
-    member.guild.channels.cache.get("810547122985893939").send("들어옴 감지");
+bot.on('guildMemberAdd', async (member) => {
     stats_update(member.guild);
+    const data = require('./data/data.json');
+    if (data.guilds[member.guild.id].autorole) {
+        const role = data.guilds[member.guild.id].autorole
+        const bot_role = member.guild.roles.cache.get(role.bot_role);
+        const user_role = member.guild.roles.cache.get(role.user_role);
+
+        if (!bot_role || !user_role) { // 권한이 존재하는지 확인
+            delete data.guilds[member.guild.id].autorole;
+            json_update(data);
+            return;
+        }
+        await member.roles.add((member.user.bot) ? bot_role : user_role);
+    }
 });
 
-bot.on('guildMemberRemove', (member) => {
-    member.guild.channels.cache.get("810547122985893939").send("나감 감지");
+bot.on('guildMemberRemove', async (member) => {
     stats_update(member.guild);
 });
 
