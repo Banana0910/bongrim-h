@@ -2,5 +2,5 @@
 
 # 토큰들
 /src/data/config.json
-/src/drive/drive_token.json
-/src/drive/youtube.token.json
+/src/api/drive/drive_token.json
+/src/api/drive/youtube.token.json
