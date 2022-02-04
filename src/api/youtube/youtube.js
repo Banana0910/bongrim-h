@@ -30,12 +30,28 @@ function search_video(word) {
             type: 'video',
             maxResults: 1,
         }, function(err, res) {
-            if (err) { reject(err) }
-            items = res.data.items;
+            if (err) { reject(err); }
+            const items = res.data.items;
             resolve(items[0].id.videoId);
         });
     });
 }
 
+function get_list(list_id) {
+    return new Promise((resolve, reject) => {
+        google.youtube('v3').playlistItems.list({
+            auth: oauth2Client,
+            part: 'contentDetails',
+            playlistId: list_id,
+            maxResults: 50
+        }, function(err,res) {
+            if (err) { reject(err); }
+            const items = res.data.items;
+            resolve(items.map(item => item.contentDetails.videoId));
+        })
+    })
+}
+
 module.exports.search_videos = search_videos;
 module.exports.search_video = search_video;
+module.exports.get_list = get_list;

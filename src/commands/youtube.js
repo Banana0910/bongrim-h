@@ -1,6 +1,6 @@
-const { CommandInteraction, MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu  } = require("discord.js");
+const { CommandInteraction, MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, Message  } = require("discord.js");
 const { createAudioPlayer, createAudioResource, AudioPlayerStatus, joinVoiceChannel } = require("@discordjs/voice");
-const { search_videos, search_video } = require('../api/youtube/youtube');
+const { search_videos, search_video, get_list } = require('../api/youtube/youtube');
 const { send_log } = require("../index");
 const ytdl = require('ytdl-core');
 
@@ -9,6 +9,34 @@ let playlist = {};
 function checkUrl(strUrl) {
     var expUrl = /^http[s]?\:\/\//i;
     return expUrl.test(strUrl);
+}
+
+function get_parameters(url) {
+    const object = {};
+    const splited = url.split("?");
+    if (splited.length > 1) {
+        const parameters = splited[1].split('&');
+        parameters.map((p) => {
+            const param = p.split('=');
+            object[param[0]] = param[1];
+        });
+        return object;
+    } else { return "no parameter" }
+}
+
+async function playlist_add(list_id, guild_id, target) {
+    const toYoutube = (id) => `https://www.youtube.com/watch?v=${id}`
+    const vids = await get_list(list_id);
+    vids.pop(target);
+    vids.map(async vid => {
+        const vid_info = await ytdl.getInfo(toYoutube(vid)).catch(err => send_log(`[vid_info 가져오는 중 오류] ${err}`));
+        if (!vid_info) return;
+        const stream = ytdl(toYoutube(vid), { filter: 'audioonly', highWaterMark: 1 << 25 });
+        playlist[guild_id].push({ 
+            info: vid_info, 
+            stream: stream
+        });
+    });
 }
 
 async function play_embed(interaction, info, volume, loop, btn) {
@@ -40,23 +68,34 @@ async function play_youtube(channel, interaction, vol, url) {
         interaction.deleteReply();
     };
     let volume = vol/10 || 1.0;
-    
     let loop = false;
 
-    let vid_info = await ytdl.getInfo(url)
-        .catch(async e => {
-            await interaction.editReply("음.. 올바른 유튜브 링크가 아닌듯하네요");
-            return;
+    const url_parameters = get_parameters(url);
+    if (url_parameters == "no parameter") {
+        await interaction.editReply("음.. 올바른 유튜브 링크가 아닌듯하네요");
+        return;
+    }
+
+    let vid_info = await ytdl.getInfo(url).catch(async e => {
+            await interaction.editReply("음.. 오디오를 재생할 수 없어요..");
         });
+    if (!vid_info) return;
 
     if (!playlist[interaction.guild.id]) {
         playlist[interaction.guild.id] = [];
         playlist[interaction.guild.id].push({ info: vid_info, stream: ytdl(url, { filter: 'audioonly', highWaterMark: 1 << 25 }) });
+        if (url_parameters.hasOwnProperty('list')) 
+            playlist_add(url_parameters.list, interaction.guild.id, vid_info.videoDetails.videoId);
     } else {
         playlist[interaction.guild.id].push({ info: vid_info, stream: ytdl(url, { filter: 'audioonly', highWaterMark: 1 << 25 }) });
-        await interaction.editReply(`**${vid_info.videoDetails.title}** (이)가 리스트에 추가됨`);
+        if (url_parameters.hasOwnProperty('list')) {
+            playlist_add(url_parameters.list, interaction.guild.id, vid_info.videoDetails.videoId);
+            await interaction.editReply(`**${vid_info.videoDetails.title}에 포함된 플레이리스트** 가 리스트에 추가됨`);
+        } else {
+            await interaction.editReply(`**${vid_info.videoDetails.title}** (이)가 리스트에 추가됨`);
+        }
         return;
-    }
+    }   
 
     let btn = new MessageActionRow({
         components: [
@@ -116,6 +155,7 @@ async function play_youtube(channel, interaction, vol, url) {
                 playlist[interaction.guild.id][0].info.videoDetails.video_url, 
                 { filter: 'audioonly', highWaterMark: 1 << 25 }), 
                 { inlineVolume: true });
+            resource.volume.setVolume(volume);
             player.play(resource);
             return;
         }
@@ -195,13 +235,15 @@ module.exports = {
         } else if (subcommand == "list") {
             let content = "";
             let num = 1;
-            (playlist[interaction.guild.id])
-            ? playlist[interaction.guild.id].map(vid => { 
-                content += `**[${(num == 1) ? "현재 재생" : num}]** ${vid.info.videoDetails.title}`;
+            playlist[interaction.guild.id].map(vid => { 
+                content += `**[${(num == 1) ? "현재 재생" : num}]** ${vid.info.videoDetails.title}\n`;
                 num++;
-            })
-            : "없음";
-            await interaction.reply(`**아래는 재생 대기 중인 리스트 입니다.**\n${content}`);
+            });
+            await interaction.reply({ embeds: [new MessageEmbed({
+                title: `재생 리스트`,
+                description: (content.length > 0) ? content : "없음",
+                color: "0x139BCC"
+            })]});
         }
     },
 };

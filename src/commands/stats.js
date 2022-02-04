@@ -23,12 +23,28 @@ module.exports = {
             const user_members = guild.members.cache.filter(m => !m.user.bot).size;
             const bot_members = guild.members.cache.filter(m => m.user.bot).size;
 
-            const category = await guild.channels.create("보고사항", { type: 'GUILD_CATEGORY', position: 1})
+            const category = await guild.channels.create("보고사항", { type: 'GUILD_CATEGORY', position: 1});
+            const everyone = interaction.guild.roles.cache.find(r => r.name === '@everyone');
             data.guilds[guild.id].stats = {
                 category: category.id,
-                all_channel: (await guild.channels.create(`린민전체-${all_members}`, { type: 'GUILD_TEXT', parent: category.id, position: 1})).id,
-                user_channel: (await guild.channels.create(`동무-${user_members}`, { type: 'GUILD_TEXT', parent: category.id, position: 2})).id,
-                bot_channel: (await guild.channels.create(`로보트-${bot_members}`, { type: 'GUILD_TEXT', parent: category.id, position: 3})).id
+                all_channel: (await guild.channels.create(`린민전체-${all_members}`, { 
+                    type: 'GUILD_TEXT', 
+                    parent: category.id, 
+                    position: 1, 
+                    permissionOverwrites: [{id: everyone.id, deny: ['SEND_MESSAGES']}]
+                })).id,
+                user_channel: (await guild.channels.create(`동무-${user_members}`, { 
+                    type: 'GUILD_TEXT', 
+                    parent: category.id, 
+                    position: 2, 
+                    permissionOverwrites: [{id: everyone.id, deny: ['SEND_MESSAGES']}]
+                })).id,
+                bot_channel: (await guild.channels.create(`로보트-${bot_members}`, { 
+                    type: 'GUILD_TEXT', 
+                    parent: category.id, 
+                    position: 3, 
+                    permissionOverwrites: [{id: everyone.id, deny: ['SEND_MESSAGES']}]
+                })).id
             };
             json_update(data);
             await interaction.reply("서버 상태 기능을 활성화 했습니다");
