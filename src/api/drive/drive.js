@@ -1,6 +1,7 @@
 const fs = require('fs');
 const { google } = require('googleapis');
 const { client_secret, client_id, redirect_uris, token } = require('./drive_token.json');
+const { send_log } = require('../../index');
 
 const FILE_ID = '1aaxNC7KDN-GzJo-rsNtngW04bRCabKJs';
 const TARGET_PATH = "./src/data/data.json"
@@ -40,7 +41,7 @@ function json_update(data)
         } 
     }, (err, res) => {
         if (err) {
-            console.error(err);
+            send_log(`[json_upload 중 오류] ${err}`);
             return;
         }
     })

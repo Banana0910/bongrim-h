@@ -6,7 +6,7 @@ const oauth2Client = new google.auth.OAuth2(
 oauth2Client.credentials = token;
 
 function search_videos(word) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         google.youtube('v3').search.list({
             auth: oauth2Client,
             part: 'snippet',
@@ -14,7 +14,7 @@ function search_videos(word) {
             type: 'video',
             maxResults: 10,
         }, function(err, res) {
-            if (err) { return err; }
+            if (err) { reject(err) }
             const items = res.data.items;
             resolve(items.map(item => ({ title: item.snippet.title, vid_id: item.id.videoId })));
         });
@@ -22,7 +22,7 @@ function search_videos(word) {
 }
 
 function search_video(word) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         google.youtube('v3').search.list({
             auth: oauth2Client,
             part: 'snippet',
@@ -30,7 +30,7 @@ function search_video(word) {
             type: 'video',
             maxResults: 1,
         }, function(err, res) {
-            if (err) { return "에러"; }
+            if (err) { reject(err) }
             items = res.data.items;
             resolve(items[0].id.videoId);
         });

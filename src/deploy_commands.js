@@ -136,41 +136,6 @@ guild_ids.map((guild_id) => {
         description: "채널들을 관리합니다.",
         options: [
             {
-                name: "타깃채널",
-                description: "타깃채널을 관리합니다",
-                type: 2,
-                options: [
-                    {
-                        name: "설정",
-                        description: "타깃채널로 설정합니다.",
-                        type: 1,
-                        options: [
-                            {
-                                name: "채널",
-                                description: "타깃채널로 설정할 채널을 선택합니다.",
-                                required: false,
-                                type: 7,
-                                channel_types: 0,
-                            }
-                        ]
-                    },
-                    {
-                        name: "삭제",
-                        description: "타깃채널로의 설정을 해제합니다.",
-                        type: 1,
-                        options: [
-                            {
-                                name: "채널",
-                                description: "타깃채널로 설정을 해제할 채널",
-                                required: false,
-                                type: 7,
-                                channel_types: 0,
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
                 name: "로그채널",
                 description: "로그채널을 관리합니다",
                 type: 2,

@@ -1,11 +1,11 @@
 {
     "guilds": {
         "758758978078769233": {
-            "target_channels": [],
-            "log_channels": []
+            "log_channels": [
+                "937358458443939860"
+            ]
         },
         "783625320062386217": {
-            "target_channels": [],
             "log_channels": [],
             "stats": {
                 "category": "938058974564073553",

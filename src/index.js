@@ -1,6 +1,24 @@
+// 모듈 정의
+async function send_log(msg) {
+    let channels = [];
+    let data = require('./data/data.json');
+    await Promise.all(Object.keys(data.guilds).map((guild) => {
+        data.guilds[guild].log_channels.map(channel => channels.push(channel));
+    }));
+    channels.map(channel => {
+        const log_channel = bot.channels.cache.get(channel);
+        if (log_channel)
+            log_channel.send(msg);
+    });
+}
+
+module.exports.send_log = send_log;
+
+//index 시작
 const fs = require('fs');
 const { json_download, json_update } = require('./api/drive/drive');
 const { Client, Intents, Collection, MessageEmbed } = require('discord.js');
+const { scheduleJob } = require('node-schedule');
 const { token } = require('./data/config.json');
 
 const bot = new Client({ 
@@ -12,21 +30,6 @@ const bot = new Client({
         Intents.FLAGS.GUILD_PRESENCES,
     ] 
 });
-
-async function send_log(msg) {
-    let channels = [];
-    let data = require('./data/data.json');
-    await new Promise.all(Object.keys(data.guilds).map((guild) => {
-        data.guilds[guild].log_channels.map(channel => channels.push(channel));
-    }));
-    channels.map(channel => {
-        const log_channel = bot.channels.cache.get(channel);
-        if (log_channel) {
-            bot.channels.cache.get(channel).send(msg);
-        }
-    })
-
-}
 
 function stats_update(guild) {
     const data = require('./data/data.json');
@@ -56,25 +59,33 @@ for (const file of files) {
     bot.commands.set(command.name, command);
 }
 
+function getinf() {
+    const { gettoday } = require('./api/school/school');
+    gettoday().catch(err => send_log(`[자동 또는 시작 gettoday 중 오류] ${err}`));
+}
+
 bot.once('ready', async () =>  { 
-    await json_download();
-    bot.user.setActivity("테스트", { type: "PLAYING" });
-    setInterval(schedule, 1000);
+    await json_download().catch(async err => {
+        await send_log(`[json_download 중 오류] ${err}`);
+        bot.destroy();
+        return;
+    });
+    const now = new Date();
     setInterval(chanege_activity, 5000);
-    console.log(`${bot.user.tag}로 로그인 함!`);
+    await send_log(`**─────[${now.toISOString().split('T')[0]} ${now.toTimeString().split(' ')[0]}] 봇 시작─────**`);
+    getinf();
     let data = require('./data/data.json');
     await Promise.all(bot.guilds.cache.map((guild) => {
         if (!data.guilds[guild.id])
-            data.guilds[guild.id] = { 
-                target_channels: [], 
-                log_channels: []
-            }
+            data.guilds[guild.id] = { log_channels: [] }
     }));
     await Promise.all(Object.keys(data.guilds).map((guild) => {
         if (!bot.guilds.cache.find(g => g.id == guild))
             delete bot.guilds[guild];
     }))
     json_update(data);
+
+    scheduleJob("0 0 0 * * *", getinf); // 매일 00시 00분 00초에 gettoday 실행
 });
 
 bot.on('interactionCreate', async interaction => {
@@ -82,11 +93,8 @@ bot.on('interactionCreate', async interaction => {
 
     const command = bot.commands.get(interaction.commandName);
 	if (!command) return;
-	try {
-		await command.execute(interaction);
-	} catch (error) {
-		console.error(error);
-	}
+	try { await command.execute(interaction); }
+	catch (error) { console.error(error); }
 });
 
 bot.on('messageCreate', async (msg) =>{
@@ -94,22 +102,19 @@ bot.on('messageCreate', async (msg) =>{
     const content = msg.content.replace(/<:\w+:\d+>/gi, '');
     if (emoji) {
         const emoji_id = emoji.map((e) => e.split(':')[2].match(/\d+/)[0]);
-        await Promise.all(emoji_id.map((id) => {
-            msg.guild.emojis.fetch(id)
-                .then((emoji) => {
-                    msg.channel.send({ embeds: [new MessageEmbed({
-                        author: {
-                            name: msg.member.displayName,
-                            iconURL: msg.member.displayAvatarURL(),
-                        },
+        await Promise.all(emoji_id.map(async (id) => {
+            await msg.guild.emojis.fetch(id)
+                .then(async (emoji) => {
+                    await msg.channel.send({ embeds: [new MessageEmbed({
+                        author: { name: msg.member.displayName, iconURL: msg.member.displayAvatarURL() },
                         image: { url: `${emoji.url}?size=1024`},
                         color: msg.member.displayHexColor,
                         description: (content) ? content : ""
                     })]});
                 })
-                .catch(console.error);
+                .catch(err => send_log(`[이모지 확대 중 오류] ${err}`));
         }));
-        msg.delete();
+        await msg.delete();
     }
 });
 
@@ -135,15 +140,7 @@ bot.on('guildMemberRemove', async (member) => {
 });
 
 const activity_list = ["테스트", "디버깅", "수리"];
-let turn = 0    
-
-function schedule() {
-    const now = new Date();
-    if (now.toTimeString().split('')[0] == "00:00:00") {
-        const { gettoday } = require("./api/school/school");
-        gettoday();
-    }   
-}
+let turn = 0;
 
 function chanege_activity() {
     bot.user.setActivity(activity_list[turn], { type: "PLAYING" });
@@ -151,5 +148,3 @@ function chanege_activity() {
 }
 
 bot.login(token);
-
-module.exports.send_log = send_log;

@@ -1,6 +1,7 @@
 const { CommandInteraction, MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu  } = require("discord.js");
 const { createAudioPlayer, createAudioResource, AudioPlayerStatus, joinVoiceChannel } = require("@discordjs/voice");
 const { search_videos, search_video } = require('../api/youtube/youtube');
+const { send_log } = require("../index");
 const ytdl = require('ytdl-core');
 
 let playlist = {};
@@ -45,7 +46,6 @@ async function play_youtube(channel, interaction, vol, url) {
     let vid_info = await ytdl.getInfo(url)
         .catch(async e => {
             await interaction.editReply("음.. 올바른 유튜브 링크가 아닌듯하네요");
-            console.error(e);
             return;
         });
 
@@ -151,7 +151,9 @@ module.exports = {
                 user_channel,
                 interaction, 
                 interaction.options.getInteger("음량"), 
-                (checkUrl(word)) ? word : `https://www.youtube.com/watch?v=${(await search_video(word))}`
+                (checkUrl(word)) ? word 
+                : `https://www.youtube.com/watch?v=${(await search_video(word)
+                    .catch(err => send_log(`[youtube search_video 오류] ${err}`)))}`
             );
         } else if (subcommand == "search") {
             const user_channel = interaction.guild.members.cache.get(interaction.user.id).voice.channel;
@@ -161,7 +163,8 @@ module.exports = {
             }
             const word = interaction.options.getString("검색어");
             await interaction.deferReply({ ephemeral: true});
-            const results = await search_videos(word);
+            const results = await search_videos(word)
+                .catch(err => send_log(`[youtube search_video 오류] ${err}`));
             let select_menu = new MessageActionRow({
                 components: [
                     new MessageSelectMenu({
@@ -186,12 +189,18 @@ module.exports = {
                 .catch(async (err) => {
                     if (err) {
                         await interaction.editReply(({ content: "명령어 사용시간이 만료되었습니다.", components: [] }));
-                        console.error(err);
+                        send_log(`[${interaction.guild.name} 길드의 ${interaction.channel.name} 채널에서의 youtube search 오류] : ${err}`);
                     }
                 });
         } else if (subcommand == "list") {
             let content = "";
-            playlist[interaction.guild.id].map(vid => {content += `${vid.videoDetails.title}\n`;});
+            let num = 1;
+            (playlist[interaction.guild.id])
+            ? playlist[interaction.guild.id].map(vid => { 
+                content += `**[${(num == 1) ? "현재 재생" : num}]** ${vid.info.videoDetails.title}`;
+                num++;
+            })
+            : "없음";
             await interaction.reply(`**아래는 재생 대기 중인 리스트 입니다.**\n${content}`);
         }
     },

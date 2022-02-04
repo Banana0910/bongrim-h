@@ -1,5 +1,6 @@
-const { getmeal, meal_embed } = require('../api/school/school')
-const { MessageEmbed } = require('discord.js')
+const { getmeal, meal_embed } = require('../api/school/school');
+const { MessageEmbed } = require('discord.js');
+const { send_log } = require('../index');
 
 module.exports = {
     name: "schoolmeal",
@@ -15,12 +16,13 @@ module.exports = {
         getmeal(year, month, day)
             .then(async (data) => { await interaction.editReply({ embeds: [meal_embed(data)]}) })
             .catch(async (err) => {
-                await interaction.editReply({ 
-                    content: (err == "no meal") 
-                        ? `${year}년 ${month}월 ${day}일 에는 급식이 없습니다..` 
-                        : `오류가 발생하여 급식을 가져오지 못하였습니다.`,
-                    embeds: []
-                })
+                if (err == "no meal") {
+                    await interaction.editReply({ content: `${year}년 ${month}월 ${day}일 에는 급식이 없습니다..`, embeds: [] });
+                    send_log(`[schoolmeal 중 오류 발생] 급식이 없음`);
+                } else {
+                    await interaction.editReply({ content: `오류가 발생하여 급식을 가져오지 못하였습니다.`, embeds: [] });
+                    send_log(`[schoolmeal 중 오류 발생] ${err}`);
+                }
             });
     }
 }

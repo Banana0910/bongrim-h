@@ -28,6 +28,7 @@
     "forever": "^4.0.3",
     "googleapis": "^39.2.0",
     "libsodium-wrappers": "^0.7.9",
-    "ytdl-core": "^4.10.0"
+    "node-schedule": "^2.1.0",
+    "ytdl-core": "^4.10.1"
   }
 }
