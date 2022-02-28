@@ -2,9 +2,10 @@ const fs = require('fs');
 const { google } = require('googleapis');
 const { client_secret, client_id, redirect_uris, token } = require('./drive_token.json');
 const { send_log } = require('../../index');
+const path = require('path');
 
 const FILE_ID = '1aaxNC7KDN-GzJo-rsNtngW04bRCabKJs';
-const TARGET_PATH = "./src/data/data.json"
+const TARGET_PATH = path.join(__dirname,"..","..","data","data.json");
 
 const oauth2Client = new google.auth.OAuth2(
     client_id, client_secret, redirect_uris[0]);

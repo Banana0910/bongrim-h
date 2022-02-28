@@ -235,13 +235,14 @@ module.exports = {
         } else if (subcommand == "list") {
             let content = "";
             let num = 1;
-            playlist[interaction.guild.id].map(vid => { 
+            content = (playlist[interaction.guild.id]) 
+            ? playlist[interaction.guild.id].map(vid => { 
                 content += `**[${(num == 1) ? "현재 재생" : num}]** ${vid.info.videoDetails.title}\n`;
                 num++;
-            });
+            }) : "없음";
             await interaction.reply({ embeds: [new MessageEmbed({
                 title: `재생 리스트`,
-                description: (content.length > 0) ? content : "없음",
+                description: content,
                 color: "0x139BCC"
             })]});
         }

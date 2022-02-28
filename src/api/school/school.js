@@ -2,6 +2,7 @@ const fs = require('fs');
 const { MessageEmbed } = require('discord.js');
 const che = require('cheerio');
 const axios = require('axios');
+const path = require('path');
 
 const SITE_URL = "http://bongrim-h.gne.go.kr/bongrim-h/dv/dietView/selectDietDetailView.do"
 
@@ -17,9 +18,8 @@ function getmeal(year, month, day) {
             if (today_meal.text().trim() != "") {
                 lunch = {
                     meal: $("#subContent > div > div:nth-child(7) > div:nth-child(5) > table > tbody > tr:nth-child(2) > td").html().trim()
-                    .replace(/\n/gi, '')
-                    .replace(/<br\s*[\/]?>/gi, '\n')
-                    .replace(/[0-9\\.]/gi, ''),
+                    .replace(/\n|[0-9\\.]/gi, '')
+                    .replace(/<br\s*[\/]?>/gi, '\n'),
                     calorie: $("#subContent > div > div:nth-child(7) > div:nth-child(5) > table > tbody > tr:nth-child(4) > td").text().trim()
                 }
             } else {
@@ -30,9 +30,8 @@ function getmeal(year, month, day) {
             if (dinner_meal.length) {
                 dinner = {
                     meal: dinner_meal.html().trim()        
-                    .replace(/\n/gi, '')
-                    .replace(/<br\s*[\/]?>/gi, '\n')
-                    .replace(/[0-9\\.]/gi, ''),
+                    .replace(/\n|[0-9\\.]/gi, '')
+                    .replace(/<br\s*[\/]?>/gi, '\n'),
                     calorie: $("#subContent > div > div:nth-child(7) > div:nth-child(6) > table > tbody > tr:nth-child(4) > td").text().trim()
                 }
             }
@@ -41,28 +40,39 @@ function getmeal(year, month, day) {
     })
 }
 
+/**
+ * @param {Date} date
+ */
+
+function datetostring(date) {
+    const splited_date = date.toLocaleString("en", { year: "numeric", month: "2-digit", day: "2-digit"}).split('/');
+    return { year: splited_date[2], month: splited_date[0], day: splited_date[1] };
+}
+
 function gettoday() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         let data = { today: {}, nextday: {} };
+
         const today = new Date();
-        const today_splited = today.toLocaleString("en", { year: "numeric", month: "2-digit", day: "numeric" }).split('/');
-        getmeal(today_splited[2], today_splited[0], today_splited[1]).then((res) => {
-            data.today = res;
-        }).catch((err) => {
-            (err == "no meal") ? (!data.today) : reject();
-        });
-        let nextday = new Date();
-        nextday.setDate(today.getDate() + 1);
-        let i = 0;
-        for (i = 0; i <= 14; i++) {
-            if (i == 14) reject("over nextday");
-            const nextday_splited = nextday.toLocaleString("en", { year: "numeric", month: "2-digit", day: "numeric" }).split('/');
-            getmeal(nextday_splited[2], nextday_splited[0], nextday_splited[1]).then((res) => {
-                data.nextday = res;
-                fs.writeFile('meal_data.json', JSON.stringify(data),resolve);
-            }).catch((err) => {
-                (err == "no meal") ? nextday.setDate(nextday.getDate() + 1) : reject(err);
-            });
+        const today_splited = datetostring(today);
+        getmeal(today_splited.year, today_splited.month, today_splited.day)
+            .then((res) => { data.today = res; })
+            .catch((err) => { (err == "no meal") ? (!data.today) : reject(); });
+
+        let nextdate = [];
+        for (let i = 0; i <= 14; i++) {
+            const date = new Date();
+            date.setDate(today.getDate()+i);
+            nextdate.push(datetostring(date));
+        }
+        let nextmeal = await Promise.any(nextdate.map(date => {
+            return getmeal(date.year, date.month, date.day);
+        }));
+        if (nextmeal) {
+            data.nextday = nextmeal;
+            fs.writeFile(path.join(__dirname,'meal_data.json'), JSON.stringify(data), resolve);
+        } else {
+            reject("over nextday");
         }
     });
 }
