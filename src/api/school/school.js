@@ -70,9 +70,7 @@ function gettoday() {
         }));
         nextmeals = nextmeals.filter(f => f.status == 'fulfilled'); // no meal인거는 전부 뺌
         if (nextmeals.length < 1) reject("over nextday"); // nextmeals의 크기가 0보다 아래라는건 14일동안 급식이 없는것
-        const toDate = (date) => {
-            return new Date(`${date.year}-${date.month}-${date.day}`);
-        }
+        const toDate = (date) => { return new Date(`${date.year}-${date.month}-${date.day}`); }
         let min_meal = nextmeals[0].value;
         for (const meal of nextmeals) {
             if (toDate(min_meal.date) > toDate(meal.value.date))
@@ -87,7 +85,9 @@ function meal_embed(data) {
     if (data.lunch) {
         const embed = new MessageEmbed({
             title: `${data.date.year}년 ${data.date.month}월 ${data.date.day}일 급식`,
-            color: "0x139BCC"
+            color: "0x139BCC",
+            timestamp: new Date(),
+            footer: { text: "※ 정규식 문제로 숫자가 깨져있습니다" }
         });
         embed.addField(`──────────────\n중식 (Lunch) (${data.lunch.calorie})\n──────────────`, data.lunch.meal,true);
         if (data.dinner)
@@ -97,7 +97,8 @@ function meal_embed(data) {
         const embed = new MessageEmbed({
             title: `이런..`,
             description: "급식이 없습니다",
-            color: "0x139BCC"
+            color: "0x139BCC",
+            timestamp: new Date(),
         });
         return embed;
     }
