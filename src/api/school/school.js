@@ -28,7 +28,7 @@ function getmeal(year, month, day) {
             }
             const dinner_meal = $("#subContent > div > div:nth-child(7) > div:nth-child(6) > table > tbody > tr:nth-child(2) > td");
             if (dinner_meal.length) {
-                dinner = {
+                dinner = { 
                     meal: dinner_meal.html().trim()        
                     .replace(/\n|[0-9\\.]/gi, '')
                     .replace(/<br\s*[\/]?>/gi, '\n'),
@@ -65,15 +65,21 @@ function gettoday() {
             date.setDate(today.getDate()+i);
             nextdate.push(datetostring(date));
         }
-        let nextmeal = await Promise.any(nextdate.map(date => {
+        let nextmeals = await Promise.allSettled(nextdate.map(date => {
             return getmeal(date.year, date.month, date.day);
         }));
-        if (nextmeal) {
-            data.nextday = nextmeal;
-            fs.writeFile(path.join(__dirname,'meal_data.json'), JSON.stringify(data), resolve);
-        } else {
-            reject("over nextday");
+        nextmeals = nextmeals.filter(f => f.status == 'fulfilled'); // no meal인거는 전부 뺌
+        if (nextmeals.length < 1) reject("over nextday"); // nextmeals의 크기가 0보다 아래라는건 14일동안 급식이 없는것
+        const toDate = (date) => {
+            return new Date(`${date.year}-${date.month}-${date.day}`);
         }
+        let min_meal = nextmeals[0].value;
+        for (const meal of nextmeals) {
+            if (toDate(min_meal.date) > toDate(meal.value.date))
+                min_meal = meal.value;
+        } //있는 것들 중에서 최소의 날짜를 가진 친구만 골라내는 작업
+        data.nextday = min_meal;
+        fs.writeFile(path.join(__dirname,'meal_data.json'), JSON.stringify(data), resolve);
     });
 }
 
