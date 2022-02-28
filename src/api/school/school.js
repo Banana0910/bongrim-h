@@ -6,6 +6,17 @@ const path = require('path');
 
 const SITE_URL = "http://bongrim-h.gne.go.kr/bongrim-h/dv/dietView/selectDietDetailView.do"
 
+/**
+ * @param {Date} date
+ */
+
+function datetostring(date) {
+    const splited_date = date.toLocaleString("en", { year: "numeric", month: "2-digit", day: "2-digit"}).split('/');
+    return { year: splited_date[2], month: splited_date[0], day: splited_date[1] };
+}
+
+// 급식 관련
+
 function getmeal(year, month, day) {
     return new Promise((resolve, reject) => {
         axios.get(SITE_URL, {
@@ -40,14 +51,6 @@ function getmeal(year, month, day) {
     })
 }
 
-/**
- * @param {Date} date
- */
-
-function datetostring(date) {
-    const splited_date = date.toLocaleString("en", { year: "numeric", month: "2-digit", day: "2-digit"}).split('/');
-    return { year: splited_date[2], month: splited_date[0], day: splited_date[1] };
-}
 
 function gettoday() {
     return new Promise(async (resolve, reject) => {
@@ -103,6 +106,8 @@ function meal_embed(data) {
         return embed;
     }
 }
+
+// 시간표 관련 (추후 추가 예정)
 
 module.exports.getmeal = getmeal;
 module.exports.gettoday = gettoday;
