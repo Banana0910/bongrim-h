@@ -130,7 +130,7 @@ function get_timetable(dayofweek) {
 }
 
 function timetable_embed(data) {
-    if (date) {
+    if (data.date) {
         const date = new Date(`${data.date.year}-${data.date.month}-${data.date.day}`);
         return get_timetable(date.getDay());
     }
