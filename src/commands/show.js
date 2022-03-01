@@ -1,5 +1,5 @@
 const { CommandInteraction } = require('discord.js');
-const { meal_embed } = require('../api/school/school');
+const { meal_embed, timetable_embed } = require('../api/school/school');
 
 module.exports = {
     name: "show",
@@ -8,10 +8,7 @@ module.exports = {
      */
     async execute(interaction) {
         const data = require('../api/school/meal_data.json');
-        await interaction.reply({ 
-            embeds: [ meal_embed((interaction.options.getString("날") == "today") 
-                ? data.today 
-                : data.nextday) ]
-            });
+        const target = (interaction.options.getString("날") == "today") ? data.today : data.nextday
+        await interaction.reply({ embeds: [ meal_embed(target), timetable_embed(target)] });
     }
 }

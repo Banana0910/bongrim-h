@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Message } = require('discord.js');
 const che = require('cheerio');
 const axios = require('axios');
 const path = require('path');
@@ -65,7 +65,7 @@ function gettoday() {
         let nextdate = [];
         for (let i = 0; i <= 14; i++) {
             const date = new Date();
-            date.setDate(today.getDate()+i);
+            date.setDate(today.getDate()+i+1);
             nextdate.push(datetostring(date));
         }
         let nextmeals = await Promise.allSettled(nextdate.map(date => {
@@ -107,8 +107,40 @@ function meal_embed(data) {
     }
 }
 
-// 시간표 관련 (추후 추가 예정)
+// 시간표 관련
+
+function get_timetable(dayofweek) {
+    const days = [null , "Mon", "Tue", "Wed", "Thu", "Fri", null];
+    const days_ko = [null , "월", "화", "수", "목", "금", null];
+    const data = require("./timetables.json");
+    const timetable = data[days[dayofweek]];
+
+    let output = "⠀⠀⠀⠀⠀⠀**1반**⠀⠀ **2반**⠀ ⠀ **3반**⠀ ⠀ **4반**\n";
+    for (let i = 0; i < timetable.count; i++) {
+        output += `**${i+1}교시**⠀⠀${timetable.class1[i]}⠀⠀${timetable.class2[i]}⠀⠀${timetable.class3[i]}⠀⠀${timetable.class4[i]}\n`
+    }
+
+    const embed = new MessageEmbed({
+        title: `${days_ko[dayofweek]}요일 시간표`,
+        description: output,
+        color: "0x139BCC",
+        timestamp: new Date()
+    });
+    return embed;
+}
+
+function timetable_embed(data) {
+    if (date) {
+        const date = new Date(`${data.date.year}-${data.date.month}-${data.date.day}`);
+        return get_timetable(date.getDay());
+    }
+    return new MessageEmbed({ title: `이런..`, description: "시간표가 없습니다", color: "0x139BCC", timestamp: new Date()});
+}
+
 
 module.exports.getmeal = getmeal;
 module.exports.gettoday = gettoday;
 module.exports.meal_embed = meal_embed;
+
+module.exports.get_timetable = get_timetable;
+module.exports.timetable_embed = timetable_embed;
