@@ -94,7 +94,7 @@ function meal_embed(data) {
         });
         embed.addField(`──────────────\n중식 (Lunch) (${data.lunch.calorie})\n──────────────`, data.lunch.meal,true);
         if (data.dinner)
-            embed.addField(`──────────────\n석식 (Dinner) (${data.lunch.calorie})\n──────────────`, data.dinner.meal, true);
+            embed.addField(`──────────────\n석식 (Dinner) (${data.dinner.calorie})\n──────────────`, data.dinner.meal, true);
         return embed;
     } else {
         const embed = new MessageEmbed({
