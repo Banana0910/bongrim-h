@@ -154,4 +154,12 @@ function chanege_activity() {
     turn = (turn == 0) ? 1 : 0;
 }
 
+// only heroku
+// function chanege_activity() {
+//     const today = new Date();
+//     const enter_day = new Date("2022-03-02");
+//     const days_ago = Math.ceil((enter_day.getTime()-today.getTime())/(1000 * 3600 * 24))+1
+//     bot.user.setActivity(`입학 ${days_ago}일차`, { type: "WATCHING" });
+// }
+
 bot.login(token);
