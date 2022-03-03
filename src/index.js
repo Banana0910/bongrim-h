@@ -72,6 +72,7 @@ bot.once('ready', async () =>  {
         const now = new Date();
         setInterval(chanege_activity, 5000);
         console.log(`${bot.user.tag} 로그인 함!`);
+        bot.user.setActivity(`정비`, { type: "PLAYING" });
         await send_log(`**┌─── [${now.toISOString().split('T')[0]} ${now.toTimeString().split(' ')[0]}] 봇 시작 ───┐**`);
         getinf();
         let data = require('./data/data.json');
@@ -146,20 +147,21 @@ bot.on('guildMemberRemove', async (member) => {
     stats_update(member.guild);
 });
 
-const activity_list = ["테스트", "디버깅", "수리"];
-let turn = 0;
+// const activity_list = ["테스트", "디버깅", "수리"];
+// let turn = 0;
 
-function chanege_activity() {
-    bot.user.setActivity(activity_list[turn], { type: "PLAYING" });
-    turn = (turn == 0) ? 1 : 0;
-}
-
-// only heroku
 // function chanege_activity() {
-//     const today = new Date();
-//     const enter_day = new Date("2022-03-02");
-//     const days_ago = Math.round((today.getTime()-enter_day.getTime())/(1000 * 3600 * 24))+1
-//     bot.user.setActivity(`입학 ${days_ago}일차`, { type: "WATCHING" });
+//     bot.user.setActivity(activity_list[turn], { type: "PLAYING" });
+//     turn = (turn == 0) ? 1 : 0;
 // }
+
+//only heroku
+function chanege_activity() {
+    const now = new Date();
+    const enter_day = new Date("2022-03-02");
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const days_ago = Math.ceil((today-enter_day)/(1000 * 3600 * 24))+1;
+    bot.user.setActivity(`입학 ${days_ago}일차`, { type: "WATCHING" });
+}
 
 bot.login(token);
