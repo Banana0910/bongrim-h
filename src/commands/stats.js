@@ -27,19 +27,19 @@ module.exports = {
             const everyone = interaction.guild.roles.cache.find(r => r.name === '@everyone');
             data.guilds[guild.id].stats = {
                 category: category.id,
-                all_channel: (await guild.channels.create(`린민전체-${all_members}`, { 
+                all_channel: (await guild.channels.create(`전체-${all_members}`, { 
                     type: 'GUILD_TEXT', 
                     parent: category.id, 
                     position: 1, 
                     permissionOverwrites: [{id: everyone.id, deny: ['SEND_MESSAGES']}]
                 })).id,
-                user_channel: (await guild.channels.create(`동무-${user_members}`, { 
+                user_channel: (await guild.channels.create(`고딩-${user_members}`, { 
                     type: 'GUILD_TEXT', 
                     parent: category.id, 
                     position: 2, 
                     permissionOverwrites: [{id: everyone.id, deny: ['SEND_MESSAGES']}]
                 })).id,
-                bot_channel: (await guild.channels.create(`로보트-${bot_members}`, { 
+                bot_channel: (await guild.channels.create(`로봇-${bot_members}`, { 
                     type: 'GUILD_TEXT', 
                     parent: category.id, 
                     position: 3, 
@@ -78,9 +78,9 @@ module.exports = {
                 return;
             }
     
-            all_channel.setName(`린민전체-${guild.members.cache.size}`);
-            user_channel.setName(`동무-${guild.members.cache.filter(m => !m.user.bot).size}`);
-            bot_channel.setName(`로보트-${guild.members.cache.filter(m => m.user.bot).size}`);
+            all_channel.setName(`전체-${guild.members.cache.size}`);
+            user_channel.setName(`고딩-${guild.members.cache.filter(m => !m.user.bot).size}`);
+            bot_channel.setName(`로봇-${guild.members.cache.filter(m => m.user.bot).size}`);
             await interaction.reply(`서버 상태 기능이 리셋되었습니다`);
         }
     }

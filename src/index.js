@@ -46,9 +46,9 @@ function stats_update(guild) {
                 return;
             }
     
-            all_channel.setName(`린민전체-${guild.members.cache.size}`);
-            user_channel.setName(`동무-${guild.members.cache.filter(m => !m.user.bot).size}`);
-            bot_channel.setName(`로보트-${guild.members.cache.filter(m => m.user.bot).size}`);
+            all_channel.setName(`전체-${guild.members.cache.size}`);
+            user_channel.setName(`고딩-${guild.members.cache.filter(m => !m.user.bot).size}`);
+            bot_channel.setName(`로봇-${guild.members.cache.filter(m => m.user.bot).size}`);
         }
     } catch(e) { send_log(`[서버 스텟 리셋 중 오류] ${err}`); }
 }
