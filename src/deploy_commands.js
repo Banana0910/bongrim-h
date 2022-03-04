@@ -12,11 +12,11 @@ guild_ids.map((guild_id) => {
 
     // client.createCommand({
     //     name: "show",
-    //     description: "급식 정보를 보여줍니다.",
+    //     description: "급식과 시간표 정보를 보여줍니다.",
     //     options: [
     //         {
     //             name: "날",
-    //             description: "보고 싶은 날의 급식을 봅니다.",
+    //             description: "보고 싶은 날의 급식과 시간표를 봅니다.",
     //             required: true,
     //             type: 3,
     //             choices: [
@@ -25,7 +25,7 @@ guild_ids.map((guild_id) => {
     //                     value: "today",
     //                 },
     //                 {
-    //                     name: "내일",
+    //                     name: "다음",
     //                     value: "next",
     //                 }
     //             ]
@@ -249,23 +249,23 @@ guild_ids.map((guild_id) => {
     //     ]
     // }, guild_id).then(console.log);
 
-    client.createCommand({
-        name: "timetable",
-        description: "원하는 요일의 시간표를 출력합니다",
-        options: [
-            {
-                name: "요일",
-                description: "원하는 요일을 선택합니다",
-                type: 4,
-                required: true,
-                choices: [
-                    { name: "월", value: 1 },
-                    { name: "화", value: 2 },
-                    { name: "수", value: 3 },
-                    { name: "목", value: 4 },
-                    { name: "금", value: 5 }
-                ]
-            }
-        ]
-    }, guild_id).then(console.log);
+    // client.createCommand({
+    //     name: "timetable",
+    //     description: "원하는 요일의 시간표를 출력합니다",
+    //     options: [
+    //         {
+    //             name: "요일",
+    //             description: "원하는 요일을 선택합니다",
+    //             type: 4,
+    //             required: true,
+    //             choices: [
+    //                 { name: "월", value: 1 },
+    //                 { name: "화", value: 2 },
+    //                 { name: "수", value: 3 },
+    //                 { name: "목", value: 4 },
+    //                 { name: "금", value: 5 }
+    //             ]
+    //         }
+    //     ]
+    // }, guild_id).then(console.log);
 });
