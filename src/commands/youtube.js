@@ -179,8 +179,8 @@ module.exports = {
      */
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
+        await interaction.deferReply();
         if (subcommand == "play") {
-            await interaction.deferReply();
             const user_channel = interaction.guild.members.cache.get(interaction.user.id).voice.channel;
             if (!user_channel) {
                 await interaction.editReply("먼저 채널에 입장해주세요");
@@ -235,11 +235,11 @@ module.exports = {
         } else if (subcommand == "list") {
             let content = "";
             let num = 1;
-            content = (playlist[interaction.guild.id]) 
+            (playlist[interaction.guild.id]) 
             ? playlist[interaction.guild.id].map(vid => { 
                 content += `**[${(num == 1) ? "현재 재생" : num}]** ${vid.info.videoDetails.title}\n`;
                 num++;
-            }) : "없음";
+            }) : (content = "없음");
             await interaction.reply({ embeds: [new MessageEmbed({
                 title: `재생 리스트`,
                 description: content,
