@@ -1,4 +1,4 @@
-const { CommandInteraction } = require("discord.js");
+const { CommandInteraction, MessageEmbed } = require("discord.js");
 const { json_update } = require("../api/drive/drive");
 
 module.exports = {
@@ -11,9 +11,21 @@ module.exports = {
         const guild = interaction.guild;
         const subcommand = interaction.options.getSubcommand();
         if (subcommand === "상태") {
-            await interaction.reply((data.guilds[guild.id].stats) 
-                ? `음.. 이 서버는 서버 상태 기능이 활성화되있네요!` 
-                : `음.. 이 서버는 서버 상태 기능이 비활성화되있네요..`)
+            if (data.guilds[guild.id].stats) {
+                const stats = data.guilds[guild.id].stats;
+                const embed = new MessageEmbed({
+                    title: "서버 상태 기능",
+                    fields: [ 
+                        { name: "전체", value: `<#${stats.all_channel}>` },
+                        { name: "유저", value: `<#${stats.user_channel}>` },
+                        { name: "봇", value: `<#${stats.bot_channel}>`}
+                    ],
+                    color: "0x139BCC"
+                });
+                await interaction.reply({ content: "서버 상태 기능이 활성화 되있으며, 설정 사항은 다음과 같습니다.", embeds: [embed]});
+            } else {
+                await interaction.reply("음.. 이 서버는 서버 상태 기능이 비활성화되있네요..")
+            }
         } else if (subcommand === "활성화") {
             if (data.guilds[guild.id].stats) {
                 await interaction.reply(`이미 서버 상태 기능이 활성화되있습니다`);
