@@ -24,7 +24,7 @@ module.exports = {
                 });
                 await interaction.reply({ content: "서버 상태 기능이 활성화 되있으며, 설정 사항은 다음과 같습니다.", embeds: [embed]});
             } else {
-                await interaction.reply("음.. 이 서버는 서버 상태 기능이 비활성화되있네요..")
+                await interaction.reply("음.. 이 서버는 서버 상태 기능이 비활성화되있네요..");
             }
         } else if (subcommand === "활성화") {
             if (data.guilds[guild.id].stats) {
