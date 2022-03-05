@@ -182,7 +182,7 @@ module.exports = {
         if (subcommand == "play") {
             const user_channel = interaction.guild.members.cache.get(interaction.user.id).voice.channel;
             if (!user_channel) {
-                await interaction.Reply("먼저 채널에 입장해주세요");
+                await interaction.reply("먼저 채널에 입장해주세요");
                 return;
             }
             await interaction.deferReply();
@@ -198,7 +198,7 @@ module.exports = {
         } else if (subcommand == "search") {
             const user_channel = interaction.guild.members.cache.get(interaction.user.id).voice.channel;
             if (!user_channel) {
-                await interaction.Reply("먼저 채널에 입장해주세요");
+                await interaction.reply("먼저 채널에 입장해주세요");
                 return;
             }
             const word = interaction.options.getString("검색어");
