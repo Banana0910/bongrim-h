@@ -57,7 +57,7 @@ module.exports = {
                         { name: "봇 권한", value: `<@&${bot_role.id}>`, inline: true },
                         { name: "유저 권한", value: `<@&${user_role.id}>`, inline: true }
                     ],
-                    color: "0x139BCC"
+                    color: interaction.guild.me.displayHexColor
                 })]
             })
         }

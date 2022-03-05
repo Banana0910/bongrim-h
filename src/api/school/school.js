@@ -84,11 +84,11 @@ function gettoday() {
     });
 }
 
-function meal_embed(data) {
+function meal_embed(data, color) {
     if (data.lunch) {
         const embed = new MessageEmbed({
             title: `${data.date.year}년 ${data.date.month}월 ${data.date.day}일 급식`,
-            color: "0x139BCC",
+            color: color,
             timestamp: new Date(),
             footer: { text: "※ 정규식 문제로 숫자가 깨져있습니다" }
         });
@@ -100,7 +100,7 @@ function meal_embed(data) {
         const embed = new MessageEmbed({
             title: `이런..`,
             description: "급식이 없습니다",
-            color: "0x139BCC",
+            color: color,
             timestamp: new Date(),
         });
         return embed;
@@ -109,7 +109,7 @@ function meal_embed(data) {
 
 // 시간표 관련
 
-function get_timetable(dayofweek) {
+function get_timetable(dayofweek, color) {
     const days = [null , "Mon", "Tue", "Wed", "Thu", "Fri", null];
     const days_ko = [null , "월", "화", "수", "목", "금", null];
     const data = require("./timetables.json");
@@ -123,18 +123,18 @@ function get_timetable(dayofweek) {
     const embed = new MessageEmbed({
         title: `${days_ko[dayofweek]}요일 시간표`,
         description: output,
-        color: "0x139BCC",
+        color: color,
         timestamp: new Date()
     });
     return embed;
 }
 
-function timetable_embed(data) {
+function timetable_embed(data, color) {
     if (data.date) {
         const date = new Date(`${data.date.year}-${data.date.month}-${data.date.day}`);
-        return get_timetable(date.getDay());
+        return get_timetable(date.getDay(), color);
     }
-    return new MessageEmbed({ title: `이런..`, description: "시간표가 없습니다", color: "0x139BCC", timestamp: new Date()});
+    return new MessageEmbed({ title: `이런..`, description: "시간표가 없습니다", color: color, timestamp: new Date()});
 }
 
 

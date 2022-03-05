@@ -20,7 +20,7 @@ module.exports = {
                         { name: "유저", value: `<#${stats.user_channel}>` },
                         { name: "봇", value: `<#${stats.bot_channel}>`}
                     ],
-                    color: "0x139BCC"
+                    color: interaction.guild.me.displayHexColor
                 });
                 await interaction.reply({ content: "서버 상태 기능이 활성화 되있으며, 설정 사항은 다음과 같습니다.", embeds: [embed]});
             } else {
