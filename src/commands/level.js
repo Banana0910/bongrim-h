@@ -37,7 +37,11 @@ module.exports = {
             json_update(data);
             await interaction.reply("유저 레벨 기능이 비활성화 되었습니다")
         } else if (subcommand == "조회") {
-            const user = interaction.guild.members.cache.get((interaction.options.getUser("유저") || interaction.user).id)
+            const user = interaction.guild.members.cache.get((interaction.options.getUser("유저") || interaction.user).id);
+            if (user.user.bot) {
+                await interaction.reply("봇은 조회가 안됩니다..");
+                return;
+            }
             const user_level = data.guilds[interaction.guild.id].levels[user.id];
             const rank = Object.keys(data.guilds[interaction.guild.id].levels).map(u => ([u, data.guilds[interaction.guild.id].levels[u].msg]));
             rank.sort((a,b) => (b[1] - a[1]));
