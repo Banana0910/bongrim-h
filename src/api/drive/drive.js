@@ -24,7 +24,7 @@ function json_download()
                     reject(err);
                     return;
                 }
-                data.on("end", resolve).on("error", err => reject(err)).pipe(dest);
+                data.on("end", () => { resolve(); }).on("error", err => reject(err)).pipe(dest);
             }
         );
     });

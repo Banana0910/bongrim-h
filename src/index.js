@@ -86,8 +86,7 @@ bot.once('ready', async () =>  {
         }))
         json_update(data);
         scheduleJob("0 0 0 * * *", getinf); // 매일 00시 00분 00초에 gettoday 실행
-    } catch (e) {
-        //만약 json_download가 안되었으면 send_log를 못함
+    } catch(e) {
         console.error(e);
         bot.destroy();
     }
@@ -141,7 +140,7 @@ bot.on('messageCreate', async (msg) => {
                     next_msg += (i * 10) + 55;
 
                 if (data.guilds[msg.guild.id].levels[msg.author.id].msg >= next_msg) {
-                    await msg.channel.send(`<@${msg.author.id}>님, 레벨 ${++data.guilds[msg.guild.id].levels[msg.author.id].level}를 달성하신것을 축하드립니다!`);
+                    await msg.channel.send(`<@${msg.author.id}>님, 레벨 ${++data.guilds[msg.guild.id].levels[msg.author.id].level}를 달성하신 것을 축하드립니다!`);
                 }
                 json_update(data);
             }
@@ -152,7 +151,7 @@ bot.on('messageCreate', async (msg) => {
 bot.on('guildMemberAdd', async (member) => {
     stats_update(member.guild);
     try {
-        const data = require('./data/data.json');
+        let data = require('./data/data.json');
         if (data.guilds[member.guild.id].autorole) {
             const role = data.guilds[member.guild.id].autorole
             const bot_role = member.guild.roles.cache.get(role.bot_role);
@@ -165,6 +164,16 @@ bot.on('guildMemberAdd', async (member) => {
             }
             await member.roles.add((member.user.bot) ? bot_role : user_role);
         }
+
+        if (data.guilds[member.guild.id].levels) {
+            data.guilds[member.guild.id].levels[member.id] = { 
+                level: 0, 
+                msg: 0, 
+                exp: 0, 
+                cool: new Date().getTime()-60000 
+            },
+            json_update(data);
+        }
     } catch(e) { send_log(`[멤버 입장 처리 중 오류] ${err}`) }
 });
 
@@ -174,10 +183,8 @@ bot.on('guildMemberRemove', async (member) => {
 
 bot.on('guildCreate', async (guild) => {
     let data = require('./data/data.json');
-    data.guilds[guild.id] = { log_channels: [], users: {} }
-    guild.members.cache.map((member) => {
-        data.guilds[guild.id].users[member.id] = { level: 0, msg: 0, exp: 0 }
-    });
+    data.guilds[guild.id] = { log_channels: [] }
+    json_update(data);
 });
 
 bot.on('guildDelete', async (guild) => {

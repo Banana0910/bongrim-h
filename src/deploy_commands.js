@@ -279,11 +279,6 @@ guild_ids.map((guild_id) => {
                 type: 1
             },
             {
-                name: "비활성화",
-                description: "유저 레벨 기능을 비활성화합니다",
-                type: 1
-            },
-            {
                 name: "조회",
                 description: "특정 유저의 레벨을 조회합니다",
                 type: 1,
