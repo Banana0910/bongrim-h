@@ -80,7 +80,7 @@ function gettoday() {
                 min_meal = meal.value;
         } //있는 것들 중에서 최소의 날짜를 가진 친구만 골라내는 작업
         data.nextday = min_meal;
-        fs.writeFile(path.join(__dirname,'meal_data.json'), JSON.stringify(data), resolve);
+        fs.writeFile(path.join(__dirname,'meal_data.json'), JSON.stringify(data, null, 4), resolve);
     });
 }
 
@@ -110,18 +110,17 @@ function meal_embed(data, color) {
 // 시간표 관련
 
 function get_timetable(dayofweek, color) {
-    const days = [null , "Mon", "Tue", "Wed", "Thu", "Fri", null];
-    const days_ko = [null , "월", "화", "수", "목", "금", null];
+    const days = [null , "월", "화", "수", "목", "금", null];
     const data = require("./timetables.json");
     const timetable = data[days[dayofweek]];
 
-    let output = "⠀⠀⠀⠀⠀⠀**1반**⠀⠀ **2반**⠀ ⠀ **3반**⠀ ⠀ **4반**\n";
+    let output = "⠀⠀⠀⠀⠀⠀⠀⠀**1반**⠀⠀⠀⠀⠀**2반**⠀⠀⠀⠀⠀**3반**⠀⠀⠀⠀⠀ **4반**\n";
     for (let i = 0; i < timetable.count; i++) {
-        output += `**${i+1}교시**⠀⠀${timetable.class1[i]}⠀⠀${timetable.class2[i]}⠀⠀${timetable.class3[i]}⠀⠀${timetable.class4[i]}\n`
+        output += `**${String.fromCharCode(0x2776+i)}교시**⠀⠀${timetable.class1[i]}⠀⠀${timetable.class2[i]}⠀⠀${timetable.class3[i]}⠀⠀${timetable.class4[i]}\n`
     }
 
     const embed = new MessageEmbed({
-        title: `${days_ko[dayofweek]}요일 시간표`,
+        title: `${days[dayofweek]}요일 시간표`,
         description: output,
         color: color,
         timestamp: new Date()

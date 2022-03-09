@@ -17,7 +17,7 @@ module.exports.send_log = send_log;
 //index 시작
 const fs = require('fs');
 const { json_download, json_update } = require('./api/drive/drive');
-const { Client, Intents, Collection, MessageEmbed } = require('discord.js');
+const { Client, Intents, Collection, MessageEmbed, Interaction, Guild, CategoryChannel } = require('discord.js');
 const { scheduleJob } = require('node-schedule');
 const { token } = require('./data/config.json');
 
@@ -78,11 +78,11 @@ bot.once('ready', async () =>  {
         let data = require('./data/data.json');
         await Promise.all(bot.guilds.cache.map((guild) => {
             if (!data.guilds[guild.id])
-                data.guilds[guild.id] = { log_channels: [] }
+                data.guilds[guild.id] = { log_channels: [] };
         }));
         await Promise.all(Object.keys(data.guilds).map((guild) => {
             if (!bot.guilds.cache.find(g => g.id == guild))
-                delete bot.guilds[guild];
+                delete data.guilds[guild];
         }))
         json_update(data);
         scheduleJob("0 0 0 * * *", getinf); // 매일 00시 00분 00초에 gettoday 실행
@@ -102,6 +102,7 @@ bot.on('interactionCreate', async interaction => {
 });
 
 bot.on('messageCreate', async (msg) => {
+    if (msg.author.bot) return;
     try {
         const emoji = msg.content.match(/<:\w+:\d+>/gi);
         const content = msg.content.replace(/<:\w+:\d+>/gi, '');
@@ -121,7 +122,31 @@ bot.on('messageCreate', async (msg) => {
                 }
             }));
         }
-    } catch(e) { send_log(`[이모지 확대 중 오류] ${err}`); }
+    } catch(e) { send_log(`[이모지 확대 중 오류] ${e}`); }
+
+    try {
+        let data = require('../src/data/data.json');
+        if (data.guilds[msg.guild.id].levels) {
+            const now = new Date().getTime();
+            const user = data.guilds[msg.guild.id].levels[msg.author.id];
+            if (now - user.cool >= 60000) {
+                data.guilds[msg.guild.id].levels[msg.author.id].cool = now;
+    
+                const xp = Math.floor(Math.random()*10)+15;
+                data.guilds[msg.guild.id].levels[msg.author.id].exp += xp;
+                data.guilds[msg.guild.id].levels[msg.author.id].msg += 1;
+                
+                let next_msg = 100;
+                for (let i = 0; i < user.level; i++) 
+                    next_msg += (i * 10) + 55;
+
+                if (data.guilds[msg.guild.id].levels[msg.author.id].msg >= next_msg) {
+                    await msg.channel.send(`<@${msg.author.id}>님, 레벨 ${++data.guilds[msg.guild.id].levels[msg.author.id].level}를 달성하신것을 축하드립니다!`);
+                }
+                json_update(data);
+            }
+        }
+    } catch(e) { send_log(`[레벨링 중 오류] ${e}`)}
 });
 
 bot.on('guildMemberAdd', async (member) => {
@@ -145,6 +170,19 @@ bot.on('guildMemberAdd', async (member) => {
 
 bot.on('guildMemberRemove', async (member) => {
     stats_update(member.guild);
+});
+
+bot.on('guildCreate', async (guild) => {
+    let data = require('./data/data.json');
+    data.guilds[guild.id] = { log_channels: [], users: {} }
+    guild.members.cache.map((member) => {
+        data.guilds[guild.id].users[member.id] = { level: 0, msg: 0, exp: 0 }
+    });
+});
+
+bot.on('guildDelete', async (guild) => {
+    let data = require('./data/data.json');
+    delete data.guilds[guild.id];
 });
 
 // const activity_list = ["테스트", "디버깅", "수리"];
