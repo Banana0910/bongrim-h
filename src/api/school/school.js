@@ -112,11 +112,13 @@ function meal_embed(data, color) {
 function get_timetable(dayofweek, color) {
     const days = [null , "월", "화", "수", "목", "금", null];
     const data = require("./timetables.json");
-    const timetable = data[days[dayofweek]];
+    const t = data[days[dayofweek]];
 
-    let output = "⠀⠀⠀⠀⠀⠀**❶반**⠀⠀**❷반**⠀⠀**❸반**⠀⠀**❹반**\n";
-    for (let i = 0; i < timetable.count; i++) {
-        output += `**${String.fromCharCode(0x2776+i)}교시**⠀⠀${timetable.class1[i]}⠀⠀${timetable.class2[i]}⠀⠀${timetable.class3[i]}⠀⠀${timetable.class4[i]}\n`
+    let output = "⠀⠀⠀⠀⠀⠀**❶반**⠀⠀ **❷반**⠀⠀ **❸반**⠀⠀ **❹반**\n";
+    for (let i = 0; i < t.count; i++) {
+        output += `───────────────────\n`
+            + `**${String.fromCharCode(0x2776+i)}교시**⠀⠀${t.class1[i]}⠀⠀ ${t.class2[i]}⠀⠀ ${t.class3[i]}⠀⠀ ${t.class4[i]}\n`
+            + `⠀ ⠀ ⠀ ⠀ ${t.class1_t[i]}⠀${t.class2_t[i]}⠀${t.class3_t[i]}⠀${t.class4_t[i]}\n`
     }
 
     const embed = new MessageEmbed({

@@ -89,6 +89,7 @@ bot.once('ready', async () =>  {
     } catch(e) {
         console.error(e);
         bot.destroy();
+        process.exit();
     }
 });
 
