@@ -114,7 +114,7 @@ function get_timetable(dayofweek, color) {
     const data = require("./timetables.json");
     const timetable = data[days[dayofweek]];
 
-    let output = "⠀⠀⠀⠀⠀⠀⠀⠀**1반**⠀⠀⠀⠀⠀**2반**⠀⠀⠀⠀⠀**3반**⠀⠀⠀⠀⠀ **4반**\n";
+    let output = "⠀⠀⠀⠀⠀⠀**❶반**⠀⠀**❷반**⠀⠀**❸반**⠀⠀**❹반**\n";
     for (let i = 0; i < timetable.count; i++) {
         output += `**${String.fromCharCode(0x2776+i)}교시**⠀⠀${timetable.class1[i]}⠀⠀${timetable.class2[i]}⠀⠀${timetable.class3[i]}⠀⠀${timetable.class4[i]}\n`
     }
