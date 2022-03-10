@@ -80,7 +80,8 @@ function gettoday() {
                 min_meal = meal.value;
         } //있는 것들 중에서 최소의 날짜를 가진 친구만 골라내는 작업
         data.nextday = min_meal;
-        fs.writeFile(path.join(__dirname,'meal_data.json'), JSON.stringify(data, null, 4), resolve);
+        fs.writeFileSync(path.join(__dirname,'meal_data.json'), JSON.stringify(data, null, 4));
+        resolve();
     });
 }
 
