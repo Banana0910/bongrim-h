@@ -4,6 +4,7 @@ const { search_videos, search_video, get_list } = require('../api/youtube/youtub
 const { send_log } = require("../index");
 const ytdl = require('ytdl-core');
 
+const YOUTUBE_COLOR = "#ff0000"
 let playlist = {};
 
 function checkUrl(strUrl) {
@@ -27,15 +28,16 @@ function get_parameters(url) {
 async function playlist_add(list_id, guild_id, target) {
     const toYoutube = (id) => `https://www.youtube.com/watch?v=${id}`
     const vids = await get_list(list_id);
-    vids.pop(target);
     vids.map(async vid => {
-        const vid_info = await ytdl.getInfo(toYoutube(vid)).catch(err => send_log(`[vid_info 가져오는 중 오류] ${err}`));
-        if (!vid_info) return;
-        const stream = ytdl(toYoutube(vid), { filter: 'audioonly', highWaterMark: 1 << 25 });
-        playlist[guild_id].push({ 
-            info: vid_info, 
-            stream: stream
-        });
+        if (vid != target) {
+            const vid_info = await ytdl.getInfo(toYoutube(vid)).catch(err => send_log(`[vid_info 가져오는 중 오류] ${err}`));
+            if (!vid_info) return;
+            const stream = ytdl(toYoutube(vid), { filter: 'audioonly', highWaterMark: 1 << 25 });
+            playlist[guild_id].push({ 
+                info: vid_info, 
+                stream: stream
+            });
+        }
     });
 }
 
@@ -45,7 +47,7 @@ async function play_embed(interaction, info, volume, loop, btn) {
         embeds: [ new MessageEmbed({
             title: info.videoDetails.title,
             image: { url: info.videoDetails.thumbnails[3].url },
-            color: "#ff0000",
+            color: YOUTUBE_COLOR,
             url: info.videoDetails.video_url,
             author: { name: info.videoDetails.ownerChannelName },
             description: `음량 : ${Math.floor(volume*10)} ${(loop == true) ? "| 루프" : ""}`,
@@ -59,6 +61,8 @@ async function play_embed(interaction, info, volume, loop, btn) {
  */
 
 async function play_youtube(channel, interaction, vol, url) {
+    await interaction.deferReply();
+
     const clear_play = () => {
         playlist[interaction.guild.id] = undefined;
         player.stop();
@@ -125,8 +129,7 @@ async function play_youtube(channel, interaction, vol, url) {
         switch(i.customId) {
             case "vol_up" :
                 i.deferUpdate();
-                volume += 0.1
-                resource.volume.setVolume(volume);
+                resource.volume.setVolume(volume += 0.1);
                 break;
             case "vol_down" :
                 i.deferUpdate();
@@ -141,7 +144,7 @@ async function play_youtube(channel, interaction, vol, url) {
                 loop = (loop) ? false : true;
                 break;
             case "skip" :
-                await i.deferUpdate();
+                i.deferUpdate();
                 player.stop();
         }
         btn.components[2].setDisabled((volume < 1.0) ? false : true);
@@ -178,73 +181,122 @@ module.exports = {
      * @param {CommandInteraction} interaction
      */
     async execute(interaction) {
-        const subcommand = interaction.options.getSubcommand();
-        if (subcommand == "play") {
-            const user_channel = interaction.guild.members.cache.get(interaction.user.id).voice.channel;
-            if (!user_channel) {
-                await interaction.reply("먼저 채널에 입장해주세요");
-                return;
-            }
-            await interaction.deferReply();
-            const word = interaction.options.getString("word");
-            play_youtube(
-                user_channel,
-                interaction, 
-                interaction.options.getInteger("음량"), 
-                (checkUrl(word)) ? word 
-                : `https://www.youtube.com/watch?v=${(await search_video(word)
-                    .catch(err => send_log(`[youtube search_video 오류] ${err}`)))}`
-            );
-        } else if (subcommand == "search") {
-            const user_channel = interaction.guild.members.cache.get(interaction.user.id).voice.channel;
-            if (!user_channel) {
-                await interaction.reply("먼저 채널에 입장해주세요");
-                return;
-            }
-            const word = interaction.options.getString("검색어");
-            await interaction.deferReply({ ephemeral: true});
-            const results = await search_videos(word)
-                .catch(err => send_log(`[youtube search_video 오류] ${err}`));
-            let select_menu = new MessageActionRow({
-                components: [
-                    new MessageSelectMenu({
-                        customId: "select_vid",
-                        placeholder: "원하는 영상을 선택하세요!",
-                        options : results.map(result => ({ 
-                            label: (result.title.length >= 100)
-                                ? `${result.title.substring(0, 95)}...`
-                                : result.title, 
-                            value: result.vid_id 
-                        }))
-                    })
-                ]
-            });
-            await interaction.editReply({ content: `검색어 **[${word}]**의 결과 입니다.`, components: [select_menu]});
-            const filter = i => { return i.user.id === interaction.user.id; };
-            interaction.channel.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 60000 })
-                .then(async _interaction => {
-                    await _interaction.deferReply();
-                    play_youtube(user_channel, _interaction, interaction.options.getInteger("음량"), `https://www.youtube.com/watch?v=${_interaction.values[0]}`);
-                })
-                .catch(async (err) => {
-                    if (err) {
-                        await interaction.editReply(({ content: "명령어 사용시간이 만료되었습니다.", components: [] }));
-                        send_log(`[${interaction.guild.name} 길드의 ${interaction.channel.name} 채널에서의 youtube search 오류] : ${err}`);
-                    }
+        const cmd_group = interaction.options.getSubcommandGroup(false) || "default";
+        const sub_cmd = interaction.options.getSubcommand();
+        if (cmd_group == "default") {
+            const youtube_url = (vid) => (`https://www.youtube.com/watch?v=${vid}`);
+            if (sub_cmd == "play") {
+                const user_channel = interaction.guild.members.cache.get(interaction.user.id).voice.channel;
+                if (!user_channel) {
+                    await interaction.reply("먼저 채널에 입장해주세요");
+                    return;
+                }
+                const word = interaction.options.getString("word");
+                play_youtube(
+                    user_channel,
+                    interaction, 
+                    interaction.options.getInteger("음량"), 
+                    (checkUrl(word)) ? word 
+                    : youtube_url((await search_video(word)
+                        .catch(err => send_log(`[youtube search_video 오류] ${err}`))))
+                );
+            } else if (sub_cmd == "search") {
+                const user_channel = interaction.guild.members.cache.get(interaction.user.id).voice.channel;
+                if (!user_channel) {
+                    await interaction.reply("먼저 채널에 입장해주세요");
+                    return;
+                }
+                const word = interaction.options.getString("검색어");
+                await interaction.deferReply({ ephemeral: true});
+                const results = await search_videos(word)
+                    .catch(err => send_log(`[youtube search_video 오류] ${err}`));
+                const select_menu = new MessageActionRow({
+                    components: [
+                        new MessageSelectMenu({
+                            customId: "select_vid",
+                            placeholder: "원하는 영상을 선택하세요!",
+                            options : results.map(result => ({ 
+                                label: (result.title.length >= 100) ? `${result.title.substring(0, 95)}...` : result.title, 
+                                value: result.vid_id 
+                            }))
+                        })
+                    ]
                 });
-        } else if (subcommand == "list") {
-            let content = "";
-            let num = 1;
-            (playlist[interaction.guild.id]) 
-            ? playlist[interaction.guild.id].map(vid => { 
-                content += `**[${(num == 1) ? "현재 재생" : num}]** ${vid.info.videoDetails.title}\n`;
-                num++;
-            }) : (content = "없음");
-            await interaction.reply({ embeds: [new MessageEmbed({
-                title: `재생 리스트`,
-                description: content,
-                color: "0x139BCC"
-            })]});
+                await interaction.editReply({ content: `검색어 **[${word}]**의 결과 입니다.`, components: [select_menu]});
+                const filter = (i) => { return i.user.id === interaction.user.id; };
+                interaction.channel.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 60000 })
+                    .then(async _interaction => {
+                        await interaction.editReply({ content: "성공!", components: [] });
+                        play_youtube(user_channel, _interaction, interaction.options.getInteger("음량"), youtube_url(_interaction.values[0]));
+                    })
+                    .catch(async (err) => {
+                        if (err) {
+                            await interaction.editReply(({ content: "명령어가 만료되었습니다.", components: [] }));
+                        }
+                    });
+            }
+        } else if (cmd_group == "list") {
+            if (sub_cmd == "show") {
+                let content = "";
+                let num = 1;
+                (playlist[interaction.guild.id]) 
+                ? playlist[interaction.guild.id].map(vid => { 
+                    content += `**[${(num == 1) ? "현재 재생" : num-1}]** ${vid.info.videoDetails.title}\n`;
+                    num++;
+                }) : (content = "없음");
+                await interaction.reply({ embeds: [new MessageEmbed({
+                    title: `재생 리스트`,
+                    description: content,
+                    color: YOUTUBE_COLOR
+                })]});
+            } else if (sub_cmd == "del") {
+                if (!playlist[interaction.guild.id]) {
+                    await interaction.reply("현재 재생 대기중인 유튜브 리스트가 없습니다");
+                    return;
+                  
+                } else {  
+                    if (playlist[interaction.guild.id].length == 1) {
+                        await interaction.reply("현재 재생 대기중인 유튜브 리스트가 없습니다");
+                        return;
+                    } else if (playlist[interaction.guild.id].length == 2) {
+                        const deleted = playlist[interaction.guild.id].splice(1,1);
+                        await interaction.reply(`**${deleted[0].info.videoDetails.title}** 을(를) 리스트에서 삭제했습니다.`);
+                        return;
+                    }
+                }
+
+                let options = []
+                for (let i = 0; i < playlist[interaction.guild.id].length; i++) {
+                    if (i == 0) continue;
+                    options.push({ 
+                        label: playlist[interaction.guild.id][i].info.videoDetails.title, 
+                        value: i.toString() 
+                    });
+                }
+
+                const select_menu = new MessageActionRow({
+                    components: [
+                        new MessageSelectMenu({
+                            customId: "select_vid",
+                            placeholder: "삭제할 영상을 선택하세요!",
+                            options: options,
+                        })
+                    ]
+                });
+                await interaction.reply({ content: `아래는 현재 재생 대기중인 유튜브 리스트 입니다.`, components: [select_menu], ephemeral: true });
+                const filter = (i) => { return i.user.id === interaction.user.id; };
+                interaction.channel.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 60000 })
+                    .then(async _interaction => {
+                        const deleted = playlist[interaction.guild.id].splice(parseInt(_interaction.values[0]), 1);
+                        await interaction.editReply({ content: "성공!", components: [] });
+                        await _interaction.channel.send(`**${deleted[0].info.videoDetails.title}** 을(를) 리스트에서 삭제했습니다.`);
+                    })
+                    .catch(async (err) => {
+                        if (err) {
+                            await interaction.editReply(({ content: "명령어가 만료되었습니다.", components: [] }));
+                        }
+                });
+            }
         }
     },
 };

@@ -45,14 +45,23 @@ module.exports = {
             const user_level = data.guilds[interaction.guild.id].levels[user.id];
             const rank = Object.keys(data.guilds[interaction.guild.id].levels).map(u => ([u, data.guilds[interaction.guild.id].levels[u].msg]));
             rank.sort((a,b) => (b[1] - a[1]));
+
+            const now_xp = ((user_level.level-1)*(110+10*(user_level.level-2))/2)+100
+            const next_xp = (user_level.level*(110+10*(user_level.level-1))/2)+100 // 등차수열의 합 공식 적용
+
+            console.log(now_xp);
+            console.log(next_xp);
+            console.log(Math.floor(((user_level.level - now_xp) / (next_xp - now_xp))*100));
+
+        
             const embed = new MessageEmbed({
                 author: { name: interaction.guild.name, icon_url: interaction.guild.iconURL() },
                 title: `${user.displayName} [#${rank.findIndex(f => f[0] == user.id)+1} / ${rank.length}]`,
                 thumbnail: { url: user.displayAvatarURL() },
                 fields: [
-                    { name: "레벨", value: `${user_level.level}Lvl`, inline: true  },
+                    { name: "레벨", value: `${user_level.level}Lvl`, inline: true },
                     { name: "메시지", value: `${user_level.msg}xp`, inline: true },
-                    { name: "경험치", value: `${user_level.exp}xp`, inline: true }
+                    { name: "경험치", value: `${user_level.exp}xp`, inline: true },
                 ],
                 color: user.displayHexColor,
             });

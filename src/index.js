@@ -136,11 +136,9 @@ bot.on('messageCreate', async (msg) => {
                 data.guilds[msg.guild.id].levels[msg.author.id].exp += xp;
                 data.guilds[msg.guild.id].levels[msg.author.id].msg += 1;
                 
-                let next_msg = 100;
-                for (let i = 0; i < user.level; i++) 
-                    next_msg += (i * 10) + 55;
+                const next_xp = (user_level.level*(110+10*(user_level.level-1))/2)+100
 
-                if (data.guilds[msg.guild.id].levels[msg.author.id].msg >= next_msg) {
+                if (data.guilds[msg.guild.id].levels[msg.author.id].msg >= next_xp) {
                     await msg.channel.send(`<@${msg.author.id}>님, 레벨 ${++data.guilds[msg.guild.id].levels[msg.author.id].level}를 달성하신 것을 축하드립니다!`);
                 }
                 json_update(data);
