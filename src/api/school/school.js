@@ -29,8 +29,9 @@ function getmeal(year, month, day) {
             if (today_meal.text().trim() != "") {
                 lunch = {
                     meal: $("#subContent > div > div:nth-child(7) > div:nth-child(5) > table > tbody > tr:nth-child(2) > td").html().trim()
-                    .replace(/\n|[0-9\\.]/gi, '')
-                    .replace(/<br\s*[\/]?>/gi, '\n'),
+                    .replace(/\n|[0-9\\.]{3,}/gi, '')
+                    .replace(/<br\s*[\/]?>/gi, '\n')
+                    .replace(/&nbsp;/gi, ' '),
                     calorie: $("#subContent > div > div:nth-child(7) > div:nth-child(5) > table > tbody > tr:nth-child(4) > td").text().trim()
                 }
             } else {
@@ -41,8 +42,9 @@ function getmeal(year, month, day) {
             if (dinner_meal.length) {
                 dinner = { 
                     meal: dinner_meal.html().trim()        
-                    .replace(/\n|[0-9\\.]/gi, '')
-                    .replace(/<br\s*[\/]?>/gi, '\n'),
+                    .replace(/\n|[0-9\\.]{3,}/gi, '')
+                    .replace(/<br\s*[\/]?>/gi, '\n')
+                    .replace(/&nbsp;/gi, ' '),
                     calorie: $("#subContent > div > div:nth-child(7) > div:nth-child(6) > table > tbody > tr:nth-child(4) > td").text().trim()
                 }
             }

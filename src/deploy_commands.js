@@ -77,71 +77,71 @@ guild_ids.map((guild_id) => {
     //     ]
     // }, guild_id).then(console.log);
 
-    client.createCommand({
-        name: "youtube",
-        description: "youtube관련 명령어를 사용합니다.",
-        options: [
-            {
-                name: "play",
-                description: "youtube에서 원하는 영상의 오디오를 재생합니다.",
-                type: 1,
-                options: [
-                    {
-                        name: "word",
-                        description: "원하는 youtube영상의 URL 또는 검색어를 입력합니다.",
-                        required: true,
-                        type: 3,
-                    },
-                    {
-                        name: "음량",
-                        description: "원하는 음량의 값을 정합니다.",
-                        required: false,
-                        type: 4,
-                        min_value: 1,
-                        max_value: 10,
-                    }
-                ]
-            },
-            {
-                name: "search",
-                description: "검색어를 이용해 youtube에서 원하는 영상을 찾습니다",
-                type: 1,
-                options: [
-                    {
-                        name: "검색어",
-                        description: "검색하고싶은 문장 또는 단어",
-                        required: true,
-                        type: 3,
-                    },
-                    {
-                        name: "음량",
-                        description: "원하는 음량의 값을 정합니다.",
-                        required: false,
-                        type: 4,
-                        min_value: 1,
-                        max_value: 10,
-                    }
-                ]
-            },
-            {
-                name: "list",
-                description: "재생 대기 중인 리스트에 관한 명령어 입니다.",
-                type: 2,
-                options: [
-                    {
-                        name: "del",
-                        description: "리스트 중에서 선택한 영상을 삭제합니다",
-                        type: 1
-                    },
-                    {
-                        name: "show",
-                        description: "리스트를 출력합니다",
-                        type: 1
-                    }
-                ]
-            }
-        ]
-    }, guild_id).then(console.log);
+    // client.createCommand({
+    //     name: "youtube",
+    //     description: "youtube관련 명령어를 사용합니다.",
+    //     options: [
+    //         {
+    //             name: "play",
+    //             description: "youtube에서 원하는 영상의 오디오를 재생합니다.",
+    //             type: 1,
+    //             options: [
+    //                 {
+    //                     name: "word",
+    //                     description: "원하는 youtube영상의 URL 또는 검색어를 입력합니다.",
+    //                     required: true,
+    //                     type: 3,
+    //                 },
+    //                 {
+    //                     name: "음량",
+    //                     description: "원하는 음량의 값을 정합니다.",
+    //                     required: false,
+    //                     type: 4,
+    //                     min_value: 1,
+    //                     max_value: 10,
+    //                 }
+    //             ]
+    //         },
+    //         {
+    //             name: "search",
+    //             description: "검색어를 이용해 youtube에서 원하는 영상을 찾습니다",
+    //             type: 1,
+    //             options: [
+    //                 {
+    //                     name: "검색어",
+    //                     description: "검색하고싶은 문장 또는 단어",
+    //                     required: true,
+    //                     type: 3,
+    //                 },
+    //                 {
+    //                     name: "음량",
+    //                     description: "원하는 음량의 값을 정합니다.",
+    //                     required: false,
+    //                     type: 4,
+    //                     min_value: 1,
+    //                     max_value: 10,
+    //                 }
+    //             ]
+    //         },
+    //         {
+    //             name: "list",
+    //             description: "재생 대기 중인 리스트에 관한 명령어 입니다.",
+    //             type: 2,
+    //             options: [
+    //                 {
+    //                     name: "del",
+    //                     description: "리스트 중에서 선택한 영상을 삭제합니다",
+    //                     type: 1
+    //                 },
+    //                 {
+    //                     name: "show",
+    //                     description: "리스트를 출력합니다",
+    //                     type: 1
+    //                 }
+    //             ]
+    //         }
+    //     ]
+    // }, guild_id).then(console.log);
 
     // client.createCommand({
     //     name: "channel",
@@ -306,3 +306,29 @@ guild_ids.map((guild_id) => {
     //     ]
     // }, guild_id).then(console.log);
 });
+
+let list = [
+    // '938401764342915083',
+    // '938401764464554005',
+    // '938401764657463356',
+    // '938401764804284426',
+    // '938401764883959828',
+
+    // '938401858257563689',
+    // '938401858635038760',
+    // '938401858635055196',
+    // '938401858651836468',
+    // '948233284058480690',
+
+    '950061921434996806'
+];
+
+list.map((r) => {
+    client.deleteCommand(r, guild_ids[1]).then(console.log);
+})
+
+// client.getCommands({ guildID: guild_ids[1] }).then((res) => {
+//     console.log(res.map((r) => {
+//         return r.id;
+//     }));
+// })
