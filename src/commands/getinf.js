@@ -17,7 +17,7 @@ module.exports = {
                     send_log("[getinf 중 오류 발생] nextday 14일 초과");
                 } else {
                     await interaction.editReply("급식을 가져오는 중 오류가 발생하여 실패했습니다..");
-                    send_log(`[getinf 중 오류 발생] ${err}`)
+                    send_log(`[getinf 중 오류 발생] ${err}`);
                 }
             });
     }
