@@ -1,6 +1,7 @@
 const { getmeal, meal_embed } = require('../api/school/school');
 const { MessageEmbed } = require('discord.js');
 const { send_log } = require('../index');
+const path = require("path");
 
 module.exports = {
     name: "schoolmeal",
@@ -8,6 +9,11 @@ module.exports = {
      * @param {CommandInteraction} interaction
      */
     async execute(interaction) {
+        const student_data = require(path.join(__dirname,"..","api","school","student_data.json"));
+        if (!student_data[interaction.user.id]) {
+            await interaction.reply(`setschool 명령어를 사용하여 학교를 등록해주세요!`);
+            return;
+        }
         const year = interaction.options.getInteger("연").toString();
         const month = interaction.options.getInteger("월").toString().padStart(2,'0');
         const day = interaction.options.getInteger("일").toString().padStart(2,'0');
@@ -16,8 +22,8 @@ module.exports = {
             description: "급식 가져오는 중..",
             color: interaction.guild.me.displayHexColor
         })] });
-        getmeal(year, month, day)
-            .then(async (data) => { await interaction.editReply({ embeds: [meal_embed(data, interaction.guild.me.displayHexColor)]}) })
+        getmeal(year, month, day, student_data[interaction.user.id])
+            .then(async (data) => { await interaction.editReply({ embeds: [meal_embed(data, interaction.guild.me.displayHexColor, student_data[interaction.user.id])]}) })
             .catch(async (err) => {
                 if (err == "no meal") {
                     await interaction.editReply({ content: `${year}년 ${month}월 ${day}일 에는 급식이 없습니다..`, embeds: [] });

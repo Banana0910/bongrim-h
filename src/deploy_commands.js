@@ -305,30 +305,9 @@ guild_ids.map((guild_id) => {
     //         }
     //     ]
     // }, guild_id).then(console.log);
+
+    // client.createCommand({
+    //     name: "setschool",
+    //     description: "자신의 학교를 설정합니다",
+    // }, guild_id).then(console.log);
 });
-
-let list = [
-    // '938401764342915083',
-    // '938401764464554005',
-    // '938401764657463356',
-    // '938401764804284426',
-    // '938401764883959828',
-
-    // '938401858257563689',
-    // '938401858635038760',
-    // '938401858635055196',
-    // '938401858651836468',
-    // '948233284058480690',
-
-    '950061921434996806'
-];
-
-list.map((r) => {
-    client.deleteCommand(r, guild_ids[1]).then(console.log);
-})
-
-// client.getCommands({ guildID: guild_ids[1] }).then((res) => {
-//     console.log(res.map((r) => {
-//         return r.id;
-//     }));
-// })

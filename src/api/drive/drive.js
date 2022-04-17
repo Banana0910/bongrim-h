@@ -4,45 +4,43 @@ const { client_secret, client_id, redirect_uris, token } = require('./drive_toke
 const { send_log } = require('../../index');
 const path = require('path');
 
-const FILE_ID = '1aaxNC7KDN-GzJo-rsNtngW04bRCabKJs';
-const TARGET_PATH = path.join(__dirname,"..","..","data","data.json");
+const files = [
+    { id: '1aaxNC7KDN-GzJo-rsNtngW04bRCabKJs', path: path.join(__dirname,"..","..","data","data.json") }, // data.json
+    { id: '1T2Tblug5f7IvxyUXIhtXxJLojrQ8GiAl', path: path.join(__dirname,"..","school","school_data.json") }, // school_data.json
+    { id: '1E21hlZh4eGhPOd_YpUhaI3l60XLjUiDn', path: path.join(__dirname,"..","school","student_data.json") } // student_data.json
+];
 
 const oauth2Client = new google.auth.OAuth2(
     client_id, client_secret, redirect_uris[0]);
 oauth2Client.credentials = token;
 
-function json_download()
-{
-    return new Promise((resolve, reject) => {
-        const drive = google.drive({version: 'v3', auth: oauth2Client });
-        const dest = fs.createWriteStream(TARGET_PATH);
-        drive.files.get(
-            {fileId: FILE_ID, alt: "media" },
-            {responseType: 'stream'},
-            function (err, { data }) {
-                if (err) {
-                    reject(err);
-                    return;
+function json_download() {
+    return Promise.all(files.map(file => {
+        return new Promise((resolve, reject) => {
+            const drive = google.drive({version: 'v3', auth: oauth2Client });
+            const dest = fs.createWriteStream(file.path);
+            drive.files.get({fileId: file.id, alt: "media" },{responseType: 'stream'},
+                (err, { data }) => {
+                    if (err) reject(err);
+                    data.on("end", resolve).on("error", reject).pipe(dest);
                 }
-                data.on("end", resolve).on("error", err => reject(err)).pipe(dest);
-            }
-        );
-    });
+            );
+        })
+    }))
 }
 
-function json_update(data)
-{
-    fs.writeFileSync(TARGET_PATH, JSON.stringify(data, null, 4))
+function json_update(data, a) {
+    fs.writeFileSync(files[a].path, JSON.stringify(data, null, 4))
     const drive = google.drive({version: 'v3', auth: oauth2Client});
     drive.files.update({ 
-        fileId: FILE_ID, 
+        fileId: files[a].id, 
         media: {
             mimeType: "application/json", 
-            body: fs.createReadStream(TARGET_PATH)
+            body: fs.createReadStream(files[a].path)
         } 
     }, (err, res) => {
         if (err) {
-            send_log(`[json_upload 중 오류] ${err}`);
+            send_log(`[json_update 중 오류] ${err}`);
             return;
         }
     })

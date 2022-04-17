@@ -84,7 +84,7 @@ bot.once('ready', async () =>  {
             if (!bot.guilds.cache.find(g => g.id == guild))
                 delete data.guilds[guild];
         }))
-        json_update(data);
+        json_update(data, 0);
         scheduleJob("0 0 0 * * *", getinf); // 매일 00시 00분 00초에 gettoday 실행
     } catch(e) {
         console.error(e);
