@@ -1,4 +1,6 @@
-const { CommandInteraction } = require("discord.js");
+const { CommandInteraction, MessageActionRow, MessageButton } = require("discord.js");
+const axios = require("axios");
+const che = require("cheerio");
 
 module.exports = {
     name: "school",
@@ -35,7 +37,7 @@ module.exports = {
             });
             const filter = (i) => { return i.user.id === interaction.user.id; };
             interaction.channel.awaitMessageComponent({ filter, componentType: 'BUTTON', time: 20000 })
-                .then(_interaction => {
+                .then(async _interaction => {
                     if (_interaction.customId == "yes") {
                         school_data[sid] = title;
                         json_update(school_data, 1);
@@ -49,7 +51,7 @@ module.exports = {
                             components: []
                         });
                     }
-                }).catch(err => {
+                }).catch(async err => {
                     await interaction.editReply({
                         content: "명령어가 만료 되었습니다",
                         components: []
