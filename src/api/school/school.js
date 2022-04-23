@@ -106,33 +106,8 @@ function get_timetable(dayofweek, color, sid) {
     const school_data = require(path.join(__dirname,"school_data.json"));
     const days = [null , "월", "화", "수", "목", "금", null];
     const data = require("./timetables.json");
-    const t = data[sid][days[dayofweek]];
-    let embed;
-
-    if (t.timetable) {
-        let output = "⠀⠀⠀⠀⠀⠀";
-        t.timetable.map(c => { output += `**${String.fromCharCode(0x2460+c.class-1)}반**⠀⠀ `; });
-        output += "\n";
-        
-        for (let i = 0; i < t.count; i++) {
-            const splitter = `${'────'.repeat(t.timetable.length+1)}`;
-            let subject = `**${String.fromCharCode(0x2460+i)}교시**⠀⠀`;
-            let teacher = `⠀ ⠀ ⠀ ⠀ `;
-            t.timetable.map(c => {
-                subject +=  `${c.subject[i]}⠀⠀ `;
-                teacher += `${c.teacher[i]}⠀`
-            });
-            output += `${splitter}\n${subject}\n${teacher}\n`;
-        }   
-        embed = new MessageEmbed({
-            author: { name: school_data[sid] },
-            title: `${days[dayofweek]}요일 시간표`,
-            description: output,
-            color: color,
-            timestamp: new Date()
-        });
-    } else {
-        embed = new MessageEmbed({ 
+    if (!data[sid]) {
+        return new MessageEmbed({ 
             author: { name: school_data[sid] }, 
             title: `이런..`, 
             description: "시간표가 없습니다", 
@@ -140,7 +115,29 @@ function get_timetable(dayofweek, color, sid) {
             timestamp: new Date()
         });
     }
-    return embed;
+    
+    const t = data[sid][days[dayofweek]];
+    let output = "⠀⠀⠀⠀⠀⠀";
+    t.timetable.map(c => { output += `**${String.fromCharCode(0x2460+c.class-1)}반**⠀⠀ `; });
+    output += "\n";
+    
+    for (let i = 0; i < t.count; i++) {
+        const splitter = `${'────'.repeat(t.timetable.length+1)}`;
+        let subject = `**${String.fromCharCode(0x2460+i)}교시**⠀⠀`;
+        let teacher = `⠀ ⠀ ⠀ ⠀ `;
+        t.timetable.map(c => {
+            subject +=  `${c.subject[i]}⠀⠀ `;
+            teacher += `${c.teacher[i]}⠀`
+        });
+        output += `${splitter}\n${subject}\n${teacher}\n`;
+    }   
+    return new MessageEmbed({
+        author: { name: school_data[sid] },
+        title: `${days[dayofweek]}요일 시간표`,
+        description: output,
+        color: color,
+        timestamp: new Date()
+    });
 }
 
 function timetable_embed(data, color, sid) {
