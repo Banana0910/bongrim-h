@@ -307,34 +307,28 @@ guild_ids.map((guild_id) => {
     // }, guild_id).then(console.log);
 
     // client.createCommand({
-    //     name: "setschool",
-    //     description: "자신의 학교를 설정합니다",
-    // }, guild_id).then(console.log);
-
-    client.createCommand({
-        name: "school",
-        description: "학교 관련 명령어입니다",
-        options: [
-            {
-                name: "추가",
-                description: "학교를 추가합니다",
-                type: 1,
-                required: true,
-                options: [
-                    {
-                        name: "학교",
-                        description: "추가할 학교의 아이디를 입력합니다 (학교 사이트에서 http://[학교아이디].gne.go.kr)",
-                        type: 3,
-                        required: true
-                    }
-                ]
-            },
-            {
-                name: "설정",
-                description: "자신의 학교를 설정합니다",
-                type: 1,
-                required: true
-            }
-        ]
-    }, guild_id).then(console.log);
+    //     name: "school",
+    //     description: "학교 관련 명령어입니다",
+    //     options: [
+    //         {
+    //             name: "추가",
+    //             description: "학교를 추가합니다",
+    //             type: 1,
+    //             options: [
+    //                 {
+    //                     name: "학교",
+    //                     description: "추가할 학교의 아이디를 입력합니다 (학교 사이트에서 http://[학교아이디].gne.go.kr)",
+    //                     type: 3,
+    //                     required: true
+    //                 }
+    //             ]
+    //         },
+    //         {
+    //             name: "설정",
+    //             description: "자신의 학교를 설정합니다",
+    //             type: 1,
+    //         }
+    //     ]
+    // }).then(console.log);
 });
+client.getCommands({}).then(console.log);
