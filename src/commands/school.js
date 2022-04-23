@@ -19,6 +19,7 @@ module.exports = {
                 return;
             }
             await interaction.deferReply();
+            const site_url = (sid) => (`https://${sid}.gne.go.kr/${sid}/dv/dietView/selectDietDetailView.do`);
             const html = await axios.get(site_url(sid));
             if (html.status != 200) {
                 await interaction.editReply(`${sid}라는 ID를 가진 창원시내 학교는 없는듯 합니다.`);
