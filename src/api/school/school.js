@@ -80,7 +80,7 @@ function meal_embed(data, color, sid) {
     if (data) {
         const embed = new MessageEmbed({
             author: { name: school_data[sid] },
-            title: `${data.date.year}년 ${data.date.month}월 ${data.date.day}일 ${data.date.dayofweek}일 급식`,
+            title: `${data.date.year}년 ${data.date.month}월 ${data.date.day}일 ${data.date.dayofweek}요일 급식`,
             color: color,
             timestamp: new Date(),
             fields: data.meals.map(meal => ({
