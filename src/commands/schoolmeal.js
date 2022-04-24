@@ -20,7 +20,7 @@ module.exports = {
         const day = interaction.options.getInteger("일").toString().padStart(2,'0');
         const dayofweek = days[(new Date(
             interaction.options.getInteger("연"), 
-            interaction.options.getInteger("월"), 
+            interaction.options.getInteger("월")-1, 
             interaction.options.getInteger("일")
         )).getDay()];
         await interaction.reply({ embeds: [new MessageEmbed({
