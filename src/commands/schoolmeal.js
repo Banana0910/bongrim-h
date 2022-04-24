@@ -14,7 +14,7 @@ module.exports = {
             await interaction.reply(`setschool 명령어를 사용하여 학교를 등록해주세요!`);
             return;
         }
-        const days = [null , "월", "화", "수", "목", "금", null];
+        const days = ["일", "월", "화", "수", "목", "금", "토"];
         const year = interaction.options.getInteger("연").toString();
         const month = interaction.options.getInteger("월").toString().padStart(2,'0');
         const day = interaction.options.getInteger("일").toString().padStart(2,'0');
