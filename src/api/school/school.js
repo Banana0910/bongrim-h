@@ -19,6 +19,8 @@ function datetostring(date) {
 
 function getmeal(year, month, day, sid) {
     return new Promise((resolve, reject) => {
+        const days = [null , "월", "화", "수", "목", "금", null];
+        const dayofweek = days[(new Date(parseInt(year), parseInt(month)-1, parseInt(day))).getDay()];
         axios.get(site_url(sid), {
             params: { dietDate: `${year}/${month}/${day}` }
         }).then(res => {
@@ -37,7 +39,7 @@ function getmeal(year, month, day, sid) {
                 const calorie = $(`#subContent > div > div:nth-child(7) > div:nth-child(${5+i}) > table > tbody > tr:nth-child(4) > td`).text().trim();
                 meals[i] = { name, meal, calorie };
             }
-            resolve({ date: { year, month, day }, meals });
+            resolve({ date: { year, month, day, dayofweek }, meals });
         }).catch(err => reject(err))
     })
 }
@@ -78,7 +80,7 @@ function meal_embed(data, color, sid) {
     if (data) {
         const embed = new MessageEmbed({
             author: { name: school_data[sid] },
-            title: `${data.date.year}년 ${data.date.month}월 ${data.date.day}일 급식`,
+            title: `${data.date.year}년 ${data.date.month}월 ${data.date.day}일 ${data.date.dayofweek}일 급식`,
             color: color,
             timestamp: new Date(),
             fields: data.meals.map(meal => ({
