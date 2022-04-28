@@ -65,7 +65,10 @@ function gettoday() {
             }
             let nextmeals = await Promise.allSettled(nextdate.map(date => (getmeal(date.year,date.month,date.day,sid))));
             nextmeals = nextmeals.filter(f => f.status == 'fulfilled'); // no meal인거는 전부 뺌
-            if (nextmeals.length < 1) reject("over nextday"); // nextmeals의 크기가 0보다 아래라는건 14일동안 급식이 없는것
+            if (nextmeals.length < 1) { // nextmeals의 크기가 0보다 아래라는건 14일동안 급식이 없는것
+                reject("over nextday"); 
+                return;
+            }
             const toDate = (date) => { return new Date(`${date.year}-${date.month}-${date.day}`); }
             nextmeals.sort((a,b) => (toDate(a.value.date) - toDate(b.value.date)));
             data[sid].nextday = nextmeals[0].value;
