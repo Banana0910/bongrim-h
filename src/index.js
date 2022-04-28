@@ -123,28 +123,6 @@ bot.on('messageCreate', async (msg) => {
             }));
         }
     } catch(e) { send_log(`[이모지 확대 중 오류] ${e}`); }
-
-    // try {
-    //     let data = require('../src/data/data.json');
-    //     if (data.guilds[msg.guild.id].levels) {
-    //         const now = new Date().getTime();
-    //         const user = data.guilds[msg.guild.id].levels[msg.author.id];
-    //         if (now - user.cool >= 60000) {
-    //             data.guilds[msg.guild.id].levels[msg.author.id].cool = now;
-    
-    //             const xp = Math.floor(Math.random()*10)+15;
-    //             data.guilds[msg.guild.id].levels[msg.author.id].exp += xp;
-    //             data.guilds[msg.guild.id].levels[msg.author.id].msg += 1;
-                
-    //             const next_xp = (user_level.level*(110+10*(user_level.level-1))/2)+100
-
-    //             if (data.guilds[msg.guild.id].levels[msg.author.id].msg >= next_xp) {
-    //                 await msg.channel.send(`<@${msg.author.id}>님, 레벨 ${++data.guilds[msg.guild.id].levels[msg.author.id].level}를 달성하신 것을 축하드립니다!`);
-    //             }
-    //             json_update(data);
-    //         }
-    //     }
-    // } catch(e) { send_log(`[레벨링 중 오류] ${e}`)}
 });
 
 bot.on('guildMemberAdd', async (member) => {
@@ -162,16 +140,6 @@ bot.on('guildMemberAdd', async (member) => {
                 return;
             }
             await member.roles.add((member.user.bot) ? bot_role : user_role);
-        }
-
-        if (data.guilds[member.guild.id].levels) {
-            data.guilds[member.guild.id].levels[member.id] = { 
-                level: 0, 
-                msg: 0, 
-                exp: 0, 
-                cool: new Date().getTime()-60000 
-            },
-            json_update(data);
         }
     } catch(e) { send_log(`[멤버 입장 처리 중 오류] ${err}`) }
 });
