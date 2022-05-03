@@ -331,4 +331,6 @@ guild_ids.map((guild_id) => {
     //     ]
     // }).then(console.log);
 });
+
+client.deleteCommand("956905408063225868").
 client.getCommands({}).then(console.log);

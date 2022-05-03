@@ -74,7 +74,7 @@ bot.once('ready', async () =>  {
         console.log(`${bot.user.tag} 로그인 함!`);
         bot.user.setActivity(`정비`, { type: "PLAYING" });
         await send_log(`**┌─── [${now.toISOString().split('T')[0]} ${now.toTimeString().split(' ')[0]}] 봇 시작 ───┐**`);
-        getinf();
+        // getinf();
         let data = require('./data/data.json');
         await Promise.all(bot.guilds.cache.map((guild) => {
             if (!data.guilds[guild.id])

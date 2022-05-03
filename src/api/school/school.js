@@ -15,12 +15,16 @@ function datetostring(date) {
 
 // 급식 관련
 
+// {
+//     RESULT: { CODE: 'ERROR-300', MESSAGE: '필수 값이 누락되어 있습니다. 요청인자를 참고 하십시오.' }
+// }
+
 function getmeal(year, month, day, sname) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         const days = [null , "월", "화", "수", "목", "금", null];
         const dayofweek = days[(new Date(parseInt(year), parseInt(month)-1, parseInt(day))).getDay()];
         const school_data = require("./school_data.json");
-        const res = axios.get("https://open.neis.go.kr/hub/mealServiceDietInfo", {
+        const res = await axios.get("https://open.neis.go.kr/hub/mealServiceDietInfo", {
             params: {
                 KEY: "f0491ec9a1784e2cb92d2a4070f1392b",
                 Type: "json",
@@ -31,6 +35,7 @@ function getmeal(year, month, day, sname) {
                 MLSV_YMD: `${year}${month}${day}`
             }
         });
+        console.log(res.data);
         if (res.data.mealServiceDietInfo[0].head[1].RESULT.CODE != 'INFO-000') {
             reject("neis api error");
             return;
