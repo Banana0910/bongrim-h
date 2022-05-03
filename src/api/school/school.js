@@ -4,8 +4,6 @@ const che = require('cheerio');
 const axios = require('axios');
 const path = require('path');
 
-const site_url = (sid) => (`https://${sid}.gne.go.kr/${sid}/dv/dietView/selectDietDetailView.do`);
-
 /**
  * @param {Date} date
  */
@@ -17,30 +15,35 @@ function datetostring(date) {
 
 // 급식 관련
 
-function getmeal(year, month, day, sid) {
+function getmeal(year, month, day, sname) {
     return new Promise((resolve, reject) => {
         const days = [null , "월", "화", "수", "목", "금", null];
         const dayofweek = days[(new Date(parseInt(year), parseInt(month)-1, parseInt(day))).getDay()];
-        axios.get(site_url(sid), {
-            params: { dietDate: `${year}/${month}/${day}` }
-        }).then(res => {
-            let meals = [];
-            const $ = che.load(res.data);
-            const count = $(".BD_table").length; // 급식 구분 수
-            if ($(`#subContent > div > div:nth-child(7) > div:nth-child(5) > table > tbody > tr:nth-child(2) > td`).text().trim() == "") {
-                reject("no meal");
+        const school_data = require("./school_data.json");
+        const res = axios.get("https://open.neis.go.kr/hub/mealServiceDietInfo", {
+            params: {
+                KEY: "f0491ec9a1784e2cb92d2a4070f1392b",
+                Type: "json",
+                pIndex: 1,
+                pSize: 100,
+                ATPT_OFCDC_SC_CODE: school_data[sname].sido,
+                SD_SCHUL_CODE: school_data[sname].code,
+                MLSV_YMD: `${year}${month}${day}`
             }
-            for (let i = 0; i < count; i++) {
-                const name = $(`#subContent > div > div:nth-child(7) > div:nth-child(${5+i}) > table > tbody > tr.dietTy_tr > td`).text().trim();
-                const meal = $(`#subContent > div > div:nth-child(7) > div:nth-child(${5+i}) > table > tbody > tr:nth-child(2) > td`).html().trim()
-                    .replace(/\n|[0-9\\.]{2,}/gi, '')
-                    .replace(/<br\s*[\/]?>/gi, '\n')
-                    .replace(/&nbsp;/gi, ' ');
-                const calorie = $(`#subContent > div > div:nth-child(7) > div:nth-child(${5+i}) > table > tbody > tr:nth-child(4) > td`).text().trim();
-                meals[i] = { name, meal, calorie };
-            }
-            resolve({ date: { year, month, day, dayofweek }, meals });
-        }).catch(err => reject(err))
+        });
+        if (res.data.mealServiceDietInfo[0].head[1].RESULT.CODE != 'INFO-000') {
+            reject("neis api error");
+            return;
+        }
+        let meals = [];
+        await Promise.all(res.data.mealServiceDietInfo[1].row.map(meal => {
+            meals.push({ 
+                name: meal.MMEAL_SC_NM,
+                meal: meal.DDISH_NM.replace(/\n|[0-9\\.]{2,}/gi, '').replace(/<br\s*[\/]?>/gi, '\n').replace(/\(\)/gi, ''),
+                calorie: meal.CAL_INFO
+            });
+        }));
+        resolve({ date: { year, month, day, dayofweek }, meals})
     })
 }
 
@@ -51,11 +54,11 @@ function gettoday() {
         const today = new Date();
         const today_s = datetostring(today);
         let data = {  };
-        await Promise.all(Object.keys(school_data).map(async sid => {
-            data[sid] = { };
-            getmeal(today_s.year, today_s.month, today_s.day, sid)
-                .then((res) => { data[sid].today = res; })
-                .catch((err) => { (err == "no meal") ? (!data[sid].today) : reject(); });
+        await Promise.all(Object.keys(school_data).map(async sname => {
+            data[sname] = { };
+            getmeal(today_s.year, today_s.month, today_s.day, sname)
+                .then((res) => { data[sname].today = res; })
+                .catch((err) => { (err == "no meal") ? (!data[sname].today) : reject(); });
     
             let nextdate = [];
             for (let i = 1; i <= 15; i++) {
@@ -63,7 +66,7 @@ function gettoday() {
                 date.setDate(today.getDate()+i);
                 nextdate.push(datetostring(date));
             }
-            let nextmeals = await Promise.allSettled(nextdate.map(date => (getmeal(date.year,date.month,date.day,sid))));
+            let nextmeals = await Promise.allSettled(nextdate.map(date => (getmeal(date.year,date.month,date.day,sname))));
             nextmeals = nextmeals.filter(f => f.status == 'fulfilled'); // no meal인거는 전부 뺌
             if (nextmeals.length < 1) { // nextmeals의 크기가 0보다 아래라는건 14일동안 급식이 없는것
                 reject("over nextday"); 
@@ -71,18 +74,18 @@ function gettoday() {
             }
             const toDate = (date) => { return new Date(`${date.year}-${date.month}-${date.day}`); }
             nextmeals.sort((a,b) => (toDate(a.value.date) - toDate(b.value.date)));
-            data[sid].nextday = nextmeals[0].value;
+            data[sname].nextday = nextmeals[0].value;
         }));
         fs.writeFileSync(path.join(__dirname,'meal_data.json'), JSON.stringify(data, null, 4));
         resolve();
     });
 }
 
-function meal_embed(data, color, sid) {
+function meal_embed(data, color, sname) {
     const school_data = require(path.join(__dirname,"school_data.json"));
     if (data) {
         const embed = new MessageEmbed({
-            author: { name: school_data[sid] },
+            author: { name: school_data[sname] },
             title: `${data.date.year}년 ${data.date.month}월 ${data.date.day}일 ${data.date.dayofweek}요일 급식`,
             color: color,
             timestamp: new Date(),
@@ -95,7 +98,7 @@ function meal_embed(data, color, sid) {
         return embed;
     } else {
         const embed = new MessageEmbed({
-            author: { name: school_data[sid] },
+            author: { name: school_data[sname] },
             title: `이런..`,
             description: "급식이 없습니다",
             color: color,
@@ -107,13 +110,13 @@ function meal_embed(data, color, sid) {
 
 // 시간표 관련
 
-function get_timetable(dayofweek, color, sid) {
+function get_timetable(dayofweek, color, sname) {
     const school_data = require(path.join(__dirname,"school_data.json"));
     const days = [null , "월", "화", "수", "목", "금", null];
     const data = require("./timetables.json");
-    if (!data[sid]) {
+    if (!data[sname]) {
         return new MessageEmbed({ 
-            author: { name: school_data[sid] }, 
+            author: { name: school_data[sname] }, 
             title: `이런..`, 
             description: "시간표가 없습니다", 
             color: color, 
@@ -121,7 +124,7 @@ function get_timetable(dayofweek, color, sid) {
         });
     }
     
-    const t = data[sid][days[dayofweek]];
+    const t = data[sname][days[dayofweek]];
     let output = "⠀⠀⠀⠀⠀⠀";
     t.timetable.map(c => { output += `**${String.fromCharCode(0x2460+c.class-1)}반**⠀⠀ `; });
     output += "\n";
@@ -137,7 +140,7 @@ function get_timetable(dayofweek, color, sid) {
         output += `${splitter}\n${subject}\n${teacher}\n`;
     }   
     return new MessageEmbed({
-        author: { name: school_data[sid] },
+        author: { name: school_data[sname] },
         title: `${days[dayofweek]}요일 시간표`,
         description: output,
         color: color,
@@ -145,13 +148,13 @@ function get_timetable(dayofweek, color, sid) {
     });
 }
 
-function timetable_embed(data, color, sid) {
+function timetable_embed(data, color, sname) {
     const school_data = require(path.join(__dirname,"school_data.json"));
     if (data) {
         const date = new Date(`${data.date.year}-${data.date.month}-${data.date.day}`);
-        return get_timetable(date.getDay(), color, sid);
+        return get_timetable(date.getDay(), color, sname);
     }
-    return new MessageEmbed({ author: { name: school_data[sid] }, title: `이런..`, description: "시간표가 없습니다", color: color, timestamp: new Date()});
+    return new MessageEmbed({ author: { name: school_data[sname] }, title: `이런..`, description: "시간표가 없습니다", color: color, timestamp: new Date()});
 }
 
 

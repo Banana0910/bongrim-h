@@ -1,7 +1,6 @@
-const { CommandInteraction, MessageActionRow, MessageButton } = require("discord.js");
+const { CommandInteraction, MessageActionRow, MessageButton, MessageSelectMenu } = require("discord.js");
 const { json_update } = require('../api/drive/drive');
 const axios = require("axios");
-const che = require("cheerio");
 
 module.exports = {
     name: "school",
@@ -13,52 +12,105 @@ module.exports = {
         let student_data = require('../api/school/student_data.json');
         let school_data = require('../api/school/school_data.json');
         if (subcommand === "추가") {
-            const sid = interaction.options.getString("학교");
-            if (student_data[sid]) {
-                await interaction.reply(`${student_data[sid]}는 이미 추가되어있습니다`);
-                return;
-            }
-            await interaction.deferReply();
-            const site_url = (sid) => (`https://${sid}.gne.go.kr/${sid}/dv/dietView/selectDietDetailView.do`);
-            const html = await axios.get(site_url(sid));
-            if (html.status != 200) {
-                await interaction.editReply(`${sid}라는 ID를 가진 창원시내 학교는 없는듯 합니다.`);
-                return;
-            }
-            const $ = che.load(html.data);
-            const title = $('title').text();
-            const btns = new MessageActionRow({
-                components: [ 
-                    new MessageButton({ customId: "yes", label: "네", style: 'SUCCESS' }),
-                    new MessageButton({ customId: "no", label: "아니오", style: 'DANGER' })
+            const options = [
+                { label: '서울특별시교육청', value: 'B10' },
+                { label: '부산광역시교육청', value: 'C10' },
+                { label: '대구광역시교육청', value: 'D10' },
+                { label: '인천광역시교육청', value: 'E10' },
+                { label: '광주광역시교육청', value: 'F10' },
+                { label: '대전광역시교육청', value: 'G10' },
+                { label: '울산광역시교육청', value: 'H10' },
+                { label: '세종특별자치시교육청', value: 'I10' },
+                { label: '경기도교육청', value: 'J10' },
+                { label: '강원도교육청', value: 'K10' },
+                { label: '충청북도교육청', value: 'M10' },
+                { label: '충청남도교육청', value: 'N10' },
+                { label: '전라북도교육청', value: 'P10' },
+                { label: '전라남도교육청', value: 'Q10' },
+                { label: '경상북도교육청', value: 'R10' },
+                { label: '경상남도교육청', value: 'S10' },
+                { label: '제주특별자치도교육청', value: 'T10' },
+                { label: '재외한국학교교육청', value: 'V10' }
+            ];
+            const query = interaction.options.getString("학교");
+            const select = new MessageActionRow({
+                components: [
+                    new MessageSelectMenu({
+                        customId: "sido_select",
+                        placeholder: "학교가 소속된 교육청을 선택해주세요",
+                        options: options
+                    })
                 ]
             });
-            await interaction.editReply({
-                content: `학교 이름이 ${title}이(가) 맞나요?`,
-                components: [ btns ]
-            });
             const filter = (i) => { return i.user.id === interaction.user.id; };
-            interaction.channel.awaitMessageComponent({ filter, componentType: 'BUTTON', time: 20000 })
-                .then(async _interaction => {
-                    if (_interaction.customId == "yes") {
-                        school_data[sid] = title;
+            await interaction.reply({ components: [select] });
+            interaction.channel.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 10000})
+            .then(async _interaction => {
+                const res = axios.get("https://open.neis.go.kr/hub/schoolInfo", {
+                    params: {
+                        KEY: "f0491ec9a1784e2cb92d2a4070f1392b",
+                        Type: "json",
+                        pIndex: 1,
+                        pSize: 100,
+                        ATPT_OFCDC_SC_CODE: _interaction.values[0],
+                        SCHUL_NM: query
+                    }
+                });
+                if (res.data.schoolInfo[0].head[1].RESULT.CODE != 'INFO-000') {
+                    await interaction.editReply("나이스 API와 연동 중 오류가 발생하였습니다.");
+                    return;
+                }
+                const schools = res.data.schoolInfo[1].row.map(school => (
+                    { [school.SCHUL_NM]: school.SD_SCHUL_CODE }
+                ));
+                const _select = new MessageActionRow({
+                    components: [
+                        new MessageSelectMenu({
+                            custom_id: "select_school",
+                            placeholder: "추가할 학교를 선택하세요!",
+                            options: res.data.schoolInfo[1].row.map(school => ({ 
+                                label: school.SCHUL_NM, 
+                                value: school.SCHUL_NM,
+                            }))
+                        }),
+                        new MessageButton({
+                            customId: "cancel",
+                            label: "x",
+                            style: 'DANGER'
+                        })
+                    ]
+                })
+                await interaction.editReply({ components: [_select] });
+                interaction.channel.awaitMessageComponent({ filter, time: 10000})
+                .then(async __interaction => {
+                    if (__interaction.customId == "select_school") {
+                        school_data[__interaction.values[0]] = {
+                            code: schools[__interaction.values[0]],
+                            sido: _interaction.values[0]
+                        }
                         json_update(school_data, 1);
                         await interaction.editReply({
-                            content: `${title}[${sid}] 학교가 추가 되었습니다!`,
+                            content: `${title}[${__interaction.values[0]}] 학교가 추가 되었습니다!`,
                             components: []
                         });
-                    } else {
+                    } else if (__interaction.customId == "cancel") {
                         await interaction.editReply({
-                            content: "학교 추가가 취소 되었습니다",
+                            content: "학교 추가가 취소되었습니다.",
                             components: []
-                        });
+                        })
                     }
                 }).catch(async err => {
-                    await interaction.editReply({
-                        content: "명령어가 만료 되었습니다",
+                    interaction.editReply({
+                        content: "명령어가 만료 되었습니다.",
                         components: []
-                    });
-                })      
+                    })
+                })
+            }).catch(async err => {
+                await interaction.editReply({
+                    content: "명령어가 만료 되었습니다.",
+                    components: []
+                });
+            });    
         } else if (subcommand == "설정") {
             const filter = (i) => { return i.user.id === interaction.user.id; };
             const select = new MessageActionRow({
