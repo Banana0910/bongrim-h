@@ -27,9 +27,13 @@ function getmeal(year, month, day, sname) {
         }
         let meals = [];
         await Promise.all(res.data.mealServiceDietInfo[1].row.map(meal => {
+            const meal_split = meal.DDISH_NM
+                .replace(/\n|[0-9\\.]{2,}/gi, '').replace(/\(\)/gi, '')
+                .split(/<br\s*[\/]?>/gi).map(m => (m.trim()));
+
             meals.push({ 
                 name: meal.MMEAL_SC_NM,
-                meal: meal.DDISH_NM.replace(/\n|[0-9\\.]{2,}/gi, '').replace(/<br\s*[\/]?>/gi, '\n').replace(/\(\)/gi, ''),
+                meal: meal_split.join('\n'),
                 calorie: meal.CAL_INFO
             });
         }));
