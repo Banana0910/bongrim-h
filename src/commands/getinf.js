@@ -12,10 +12,12 @@ module.exports = {
         gettoday()
             .then(async () => { await interaction.editReply("급식 정보가 서버에 저장되었습니다!") })
             .catch(async (err) => { 
-                if (err != "over nextday") {
+                if (err.startsWith("over nextday")) {
+                    await interaction.editReply("급식 정보가 서버에 저장이 되었으나, 조금 이상하네요..?");
+                } else {
                     await interaction.editReply("급식을 가져오는 중 오류가 발생하여 실패했습니다..");
-                    send_log(`[getinf 중 오류 발생] ${err}`);
                 }
+                send_log(`[getinf 중 오류 발생] ${err}`);
             });
     }
 }

@@ -12,7 +12,7 @@ function getmeal(year, month, day, sname) {
         const school_data = require("./school_data.json");
         const res = await axios.get("https://open.neis.go.kr/hub/mealServiceDietInfo", {
             params: {
-                KEY: "f0491ec9a1784e2cb92d2a4070f1392b",
+                KEY: process.env.NEIS_KEY,
                 Type: "json",
                 pIndex: 1,
                 pSize: 100,
@@ -63,7 +63,7 @@ function gettoday() {
             let nextmeals = await Promise.allSettled(nextdate.map(date => (getmeal(date.year,date.month,date.day,sname))));
             nextmeals = nextmeals.filter(f => f.status == 'fulfilled'); // no meal인거는 전부 뺌
             if (nextmeals.length < 1) { // nextmeals의 크기가 0보다 아래라는건 14일동안 급식이 없는것
-                reject("over nextday"); 
+                reject(`over nextday[${sname}]`); 
                 return;
             }
             const toDate = (date) => { return new Date(`${date.year}-${date.month}-${date.day}`); }
