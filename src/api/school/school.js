@@ -1,23 +1,9 @@
 const fs = require('fs');
 const { MessageEmbed } = require('discord.js');
-const che = require('cheerio');
 const axios = require('axios');
 const path = require('path');
 
-/**
- * @param {Date} date
- */
-
-function datetostring(date) {
-    const splited_date = date.toLocaleString("en", { year: "numeric", month: "2-digit", day: "2-digit"}).split('/');
-    return { year: splited_date[2], month: splited_date[0], day: splited_date[1] };
-}
-
 // 급식 관련
-
-// {
-//     RESULT: { CODE: 'ERROR-300', MESSAGE: '필수 값이 누락되어 있습니다. 요청인자를 참고 하십시오.' }
-// }
 
 function getmeal(year, month, day, sname) {
     return new Promise(async (resolve, reject) => {
@@ -35,9 +21,8 @@ function getmeal(year, month, day, sname) {
                 MLSV_YMD: `${year}${month}${day}`
             }
         });
-        console.log(res.data);
-        if (res.data.mealServiceDietInfo[0].head[1].RESULT.CODE != 'INFO-000') {
-            reject("neis api error");
+        if (res.data.RESULT) {
+            reject((res.data.RESULT.CODE == 'INFO-200') ? "no meal" : res.data.RESULT.MESSAGE);
             return;
         }
         let meals = [];
@@ -55,6 +40,10 @@ function getmeal(year, month, day, sname) {
 
 function gettoday() {
     return new Promise(async (resolve, reject) => {
+        const datetostring = (date) => {
+            const splited_date = date.toLocaleString("en", { year: "numeric", month: "2-digit", day: "2-digit"}).split('/');
+            return { year: splited_date[2], month: splited_date[0], day: splited_date[1] };
+        }
         const school_data = require(path.join(__dirname,"school_data.json"));
         const today = new Date();
         const today_s = datetostring(today);
@@ -87,10 +76,9 @@ function gettoday() {
 }
 
 function meal_embed(data, color, sname) {
-    const school_data = require(path.join(__dirname,"school_data.json"));
     if (data) {
         const embed = new MessageEmbed({
-            author: { name: school_data[sname] },
+            author: { name: sname },
             title: `${data.date.year}년 ${data.date.month}월 ${data.date.day}일 ${data.date.dayofweek}요일 급식`,
             color: color,
             timestamp: new Date(),
@@ -103,7 +91,7 @@ function meal_embed(data, color, sname) {
         return embed;
     } else {
         const embed = new MessageEmbed({
-            author: { name: school_data[sname] },
+            author: { name: sname },
             title: `이런..`,
             description: "급식이 없습니다",
             color: color,
@@ -116,12 +104,11 @@ function meal_embed(data, color, sname) {
 // 시간표 관련
 
 function get_timetable(dayofweek, color, sname) {
-    const school_data = require(path.join(__dirname,"school_data.json"));
     const days = [null , "월", "화", "수", "목", "금", null];
     const data = require("./timetables.json");
     if (!data[sname]) {
         return new MessageEmbed({ 
-            author: { name: school_data[sname] }, 
+            author: { name: sname }, 
             title: `이런..`, 
             description: "시간표가 없습니다", 
             color: color, 
@@ -145,7 +132,7 @@ function get_timetable(dayofweek, color, sname) {
         output += `${splitter}\n${subject}\n${teacher}\n`;
     }   
     return new MessageEmbed({
-        author: { name: school_data[sname] },
+        author: { name: sname },
         title: `${days[dayofweek]}요일 시간표`,
         description: output,
         color: color,
@@ -154,12 +141,11 @@ function get_timetable(dayofweek, color, sname) {
 }
 
 function timetable_embed(data, color, sname) {
-    const school_data = require(path.join(__dirname,"school_data.json"));
     if (data) {
         const date = new Date(`${data.date.year}-${data.date.month}-${data.date.day}`);
         return get_timetable(date.getDay(), color, sname);
     }
-    return new MessageEmbed({ author: { name: school_data[sname] }, title: `이런..`, description: "시간표가 없습니다", color: color, timestamp: new Date()});
+    return new MessageEmbed({ author: { name: sname }, title: `이런..`, description: "시간표가 없습니다", color: color, timestamp: new Date()});
 }
 
 

@@ -11,7 +11,7 @@ module.exports = {
     async execute(interaction) {
         const student_data = require(path.join(__dirname,"..","api","school","student_data.json"));
         if (!student_data[interaction.user.id]) {
-            await interaction.reply(`setschool 명령어를 사용하여 학교를 등록해주세요!`);
+            await interaction.reply(`[school 설정] 명령어를 사용하여 학교를 등록해주세요!`);
             return;
         }
         const days = ["일", "월", "화", "수", "목", "금", "토"];

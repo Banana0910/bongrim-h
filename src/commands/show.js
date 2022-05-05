@@ -10,14 +10,14 @@ module.exports = {
      */
     async execute(interaction) {
         const student_data = require(path.join(__dirname,"..","api","school","student_data.json"));
-        const sid = student_data[interaction.user.id];
-        if (!sid) {
-            await interaction.reply(`setschool 명령어를 사용하여 학교를 등록해주세요!`);
+        const sname = student_data[interaction.user.id];
+        if (!sname) {
+            await interaction.reply(`[school 설정] 명령어를 사용하여 학교를 등록해주세요!`);
             return;
         }
         let data = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'api', 'school','meal_data.json')));
         const color = interaction.guild.me.displayHexColor
-        const target = (interaction.options.getString("날") == "today") ? data[sid].today : data[sid].nextday
-        await interaction.reply({ embeds: [ meal_embed(target, color, sid), timetable_embed(target, color, sid)] });
+        const target = (interaction.options.getString("날") == "today") ? data[sname].today : data[sname].nextday
+        await interaction.reply({ embeds: [ meal_embed(target, color, sname), timetable_embed(target, color, sname)] });
     }
 }
