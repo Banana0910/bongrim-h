@@ -167,13 +167,23 @@ bot.on('guildDelete', async (guild) => {
 //     turn = (turn == 0) ? 1 : 0;
 // }
 
+
+let turn = 0;
 //only heroku
 function chanege_activity() {
     const now = new Date();
-    const enter_day = new Date("2022-03-02");
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const days_ago = Math.ceil((today-enter_day)/(1000 * 3600 * 24))+1;
-    bot.user.setActivity(`입학 ${days_ago}일차`, { type: "WATCHING" });
+    if (turn == 0) {
+        const enter_day = new Date("2022-03-02");
+        const days_ago = Math.ceil((today-enter_day)/(1000 * 3600 * 24))+1;
+        bot.user.setActivity(`입학 ${days_ago}일차`, { type: "WATCHING" });
+        turn++;
+    } else {
+        const vacation_day = new Date("2022-07-20");
+        const days_ago = Math.ceil((vacation_day-today)/(1000 * 3600 * 24))+1;
+        bot.user.setActivity(`여름방학까지 ${days_ago}일 남은거`, { type: "WATCHING"});
+        turn = 0;
+    }
 }
 
 bot.login(token);
