@@ -22,7 +22,7 @@ module.exports = {
                 bot_role: bot_role.id,
                 user_role: user_role.id
             }
-            json_update(data);
+            json_update(data, 0);
             await interaction.reply("자동 권한 부여 기능이 활성화되었습니다!");
         } else if (subcommand == "비활성화") {
             if (!data.guilds[guild.id].autorole) {
@@ -44,7 +44,7 @@ module.exports = {
     
             if (!bot_role || !user_role) { // 권한이 존재하는지 확인
                 delete data.guilds[guild.id].autorole;
-                json_update(data);
+                json_update(data, 0);
                 await interaction.reply("자동 권한 부여 기능에 설정된 권한이 삭제되어\n기능을 비활성화시켯습니다\n추후에 다시 추가해 주시기 바랍니다.");
                 return;
             }

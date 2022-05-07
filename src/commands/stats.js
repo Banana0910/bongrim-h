@@ -58,7 +58,7 @@ module.exports = {
                     permissionOverwrites: [{id: everyone.id, deny: ['SEND_MESSAGES']}]
                 })).id
             };
-            json_update(data);
+            json_update(data, 0);
             await interaction.reply("서버 상태 기능을 활성화 했습니다");
         } else if (subcommand === "비활성화") {
             if (!data.guilds[guild.id].stats) {
@@ -71,7 +71,7 @@ module.exports = {
                 if (channel) channel.delete();
             }));
             delete data.guilds[guild.id].stats
-            json_update(data);
+            json_update(data, 0);
             await interaction.reply("서버 상태 기능을 비활성화 했습니다");
         } else if (subcommand === "리셋") {
             if (!data.guilds[guild.id].stats) {
@@ -85,7 +85,7 @@ module.exports = {
     
             if (!all_channel || !user_channel || !bot_channel) {
                 delete data.guilds[guild.id].stats;
-                json_update(data);
+                json_update(data, 0);
                 await interaction.reply("서버 상태 기능에 문제가 생겨 초기화를 하였습니다.\n추후에 다시 설정해주시기 바랍니다.");
                 return;
             }
