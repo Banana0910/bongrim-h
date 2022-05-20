@@ -70,7 +70,7 @@ bot.once('ready', async () =>  {
     try {
         await json_download();
         const now = new Date();
-        setInterval(chanege_activity, 5000);
+        setInterval(change_activity, 5000);
         console.log(`${bot.user.tag} 로그인 함!`);
         bot.user.setActivity(`정비`, { type: "PLAYING" });
         await send_log(`**┌─── [${now.toISOString().split('T')[0]} ${now.toTimeString().split(' ')[0]}] 봇 시작 ───┐**`);
@@ -169,20 +169,29 @@ bot.on('guildDelete', async (guild) => {
 
 
 let turn = 0;
-//only heroku
-function chanege_activity() {
+let dates = [
+    { date: "2022-03-02", type: 0, text: "입학"},
+    { date: "2022-07-20", type: 1, text: "여름방학"},
+    { date: "2022-06-28", type: 1, text: "기말고사"}
+];
+
+function change_activity() {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    if (turn == 0) {
-        const enter_day = new Date("2022-03-02");
-        const days_ago = Math.ceil((today-enter_day)/(1000 * 3600 * 24))+1;
-        bot.user.setActivity(`입학 ${days_ago}일차`, { type: "WATCHING" });
-        turn++;
+    const target = dates[turn];
+    const target_day = new Date(target.date);
+    if (target.type == 0) {
+        const days_ago = Math.ceil((today-target_day)/(1000 * 3600 * 24))+1;
+        bot.user.setActivity(`${target.text} ${days_ago}일차`, { type: "WATCHING" });
     } else {
-        const vacation_day = new Date("2022-07-20");
-        const days_ago = Math.ceil((vacation_day-today)/(1000 * 3600 * 24))+1;
-        bot.user.setActivity(`여름방학까지 ${days_ago}일 남은거`, { type: "WATCHING"});
+        const days_ago = Math.ceil((target_day-today)/(1000 * 3600 * 24));
+        bot.user.setActivity(`${target.text}까지 ${days_ago}일`, { type: "WATCHING" });
+    }
+
+    if (turn >= dates.length-1) {
         turn = 0;
+    } else {
+        turn++;
     }
 }
 
