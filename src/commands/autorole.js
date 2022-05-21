@@ -23,7 +23,8 @@ module.exports = {
                 user_role: user_role.id
             }
             json_update(data, 0);
-            await interaction.reply("자동 권한 부여 기능이 활성화되었습니다!");
+            if (data.guilds[guild.id].autorole) await interaction.reply("자동 권한 부여 기능이 수정되었습니다!");
+            else await interaction.reply("자동 권한 부여 기능이 활성화되었습니다!");
         } else if (subcommand == "비활성화") {
             if (!data.guilds[guild.id].autorole) {
                 await interaction.reply("자동 권한 부여 기능이 설정된적이 없는데요..?");
