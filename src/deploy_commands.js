@@ -335,4 +335,34 @@ guild_ids.map((guild_id) => {
     //         }
     //     ]
     // }).then(console.log);
+
+    client.createCommand({
+        name: "vote",
+        description: "투표 관련 명령어입니다",
+        options: [
+            {
+                name: "생성",
+                description: "투표를 생성합니다",
+                type: 1,
+                options: [
+                    {
+                        name: "주제",
+                        description: "투표의 주제를 입력합니다",
+                        type: 3,
+                        required: true
+                    }
+                ]
+            },
+            {
+                name: "마감",
+                description: "투표를 마감합니다",
+                type: 1
+            },
+            {
+                name: "불러오기",
+                description: "진행 중인 투표를 불러옵니다",
+                type: 1
+            }
+        ]
+    })
 });

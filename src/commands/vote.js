@@ -1,4 +1,4 @@
-const { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } = require("discord.js");
+const { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu } = require("discord.js");
 const { json_update } = require("../api/drive/drive");
 
 module.exports = {
@@ -8,6 +8,45 @@ module.exports = {
      */
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
+        const create_vote = (interaction, index, data) => {
+            const vote = data.guilds[interaction.guild.id].votes[index];
+            const author = interaction.member;
+            const get_list = (condition) => {
+                const output = Object.keys(vote.voter).filter(k => vote.voter[k] == condition)
+                    .map(id => (interaction.guild.members.cache.get(id).user.tag)).join('\n')
+                return (output != "") ? output : "없음";
+            }
+            return { 
+                embeds: [
+                    new MessageEmbed({
+                        author: { name: `${author.user.username}님의 투표 주제`, iconURL: author.displayAvatarURL() },
+                        title: `**${vote.topic}**`,
+                        fields: [
+                            { 
+                                name: `**찬성 [${Object.values(vote.voter).filter(a => a == "o").length}명]**`, 
+                                value: get_list("o"),
+                                inline: true
+                            },
+                            {
+                                name: `**반대 [${Object.values(vote.voter).filter(a => a == "x").length}명]**`, 
+                                value: get_list("x"),
+                                inline: true
+                            }
+                        ],
+                        color: author.displayHexColor,
+                        footer: { text: interaction.guild.name, iconURL: interaction.guild.iconURL() }
+                    })
+                ],
+                components: [
+                    new MessageActionRow({
+                        components: [
+                            new MessageButton({ customId: `yes${index}`, label: "찬성", style: 'SUCCESS' }),
+                            new MessageButton({ customId: `no${index}`, label: "반대", style: 'DANGER' })
+                        ]
+                    })
+                ]
+            }
+        }
         let data = require("../data/data.json");
         if (subcommand == "생성") {
             const topic = interaction.options.getString("주제");
@@ -15,59 +54,129 @@ module.exports = {
             if (!data.guilds[interaction.guild.id].votes)
                 data.guilds[interaction.guild.id].votes = [];
 
-            data.guilds[interaction.guild.id].push({ topic, author: interaction.user.id, voter: {} });
+            data.guilds[interaction.guild.id].votes.push({ topic, author: interaction.user.id, voter: {} });
+            json_update(data, 0);
 
-            const index = data.guilds[interaction.guild.id].votes.length;
-            const btns = new MessageActionRow({
+            const index = data.guilds[interaction.guild.id].votes.length-1;
+
+            const msg = await interaction.channel.send(create_vote(interaction, index, data));
+            const collecter = interaction.channel.createMessageComponentCollector();
+            collecter.on('collect', async i => {
+                if (i.customId == `yes${index}`) {
+                    i.deferUpdate();
+                    let data = require("../data/data.json");
+                    data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "o";
+                    await msg.edit(create_vote(interaction, index, data));
+                    json_update(data, 0);
+                } else if (i.customId == `no${index}`) {
+                    i.deferUpdate();
+                    let data = require("../data/data.json");
+                    data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
+                    await msg.edit(create_vote(interaction, index, data));
+                    json_update(data, 0);
+                }
+            });
+        } else if (subcommand == "마감") {
+            if (!data.guilds[interaction.guild.id].votes) {
+                await interaction.reply("이 서버에는 진행 중인 투표가 없습니다");
+                return;
+            }
+
+            let options = [];
+            for (let i = 0; i < data.guilds[interaction.guild.id].votes.length; i++) {
+                const vote = data.guilds[interaction.guild.id].votes[i];
+                options[i] = {
+                    label: vote.topic,
+                    description: `찬성 : ${Object.values(vote.voter).filter(a => a == "o").length}명 반대 : ${Object.values(vote.voter).filter(a => a == "x").length}명`,
+                    value: i.toString()
+                }
+            }
+            const select = new MessageActionRow({
                 components: [
-                    new MessageButton({ customId: "yes", label: "찬성", style: 'SUCCESS' }),
-                    new MessageButton({ customId: "no", label: "반대", style: 'DANGER' })
+                    new MessageSelectMenu({
+                        custom_id: "close_vote",
+                        placeholder: "마감할 투표를 선택해주세요!",
+                        options: options
+                    }),
                 ]
             });
 
-            const create_embed = (data) => {
-                const vote = data.guilds[interaction.guild.id].vote[index];
-                const author = interaction.user;
-                return new MessageEmbed({
-                    author: { name: `${author.username}님의 투표 주제`, iconURL: author.displayAvatarURL() },
-                    title: `**${vote.topic}**`,
-                    fileds: [
-                        { 
-                            name: `**찬성 [${Object.values(vote.voter).filter(a => a == "o").length}명]**`, 
-                            value: Object.keys(vote.voter).filter(k => vote.voter[k] == "o")
-                                .map(id => (interaction.guild.members.cache.get(id).user.tag)).join('\n')
-                        },
-                        {
-                            name: `**반대 [${vote.voter.filter(i => i.answer == "x").length}명]**`, 
-                            value: Object.keys(vote.voter).filter(k => vote.voter[k] == "x")
-                                .map(id => (interaction.guild.members.cache.get(id).user.tag)).join('\n')
+            await interaction.reply({ components: [select]});
+            const filter = (i) => { return i.user.id === interaction.user.id; };
+            interaction.channel.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 20000})
+                .then(async _interaction => {
+                    interaction.deleteReply();
+                    const index = Number(_interaction.values[0]);
+                    const msg = await interaction.channel.send(create_vote(interaction, index, data));
+                    const collecter = interaction.channel.createMessageComponentCollector();
+                    collecter.on('collect', async i => {
+                        if (i.customId == `yes${index}`) {
+                            i.deferUpdate();
+                            let data = require("../data/data.json");
+                            data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "o";
+                            await msg.edit(create_vote(interaction, index, data));
+                            json_update(data, 0);
+                        } else if (i.customId == `no${index}`) {
+                            i.deferUpdate();
+                            let data = require("../data/data.json");
+                            data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
+                            await msg.edit(create_vote(interaction, index, data));
+                            json_update(data, 0);
                         }
-                    ]
-                });
+                    });
+                }).catch(async () => {
+                    await interaction.editReply({ content: "명령어가 만료되었습니다", components: []})
+                })
+        } else if (subcommand == "불러오기") {
+            if (!data.guilds[interaction.guild.id].votes) {
+                await interaction.reply("이 서버에는 진행 중인 투표가 없습니다");
+                return;
             }
-            await interaction.channel.send({ embeds: [create_embed()], components: [btns] });
-            const collecter = interaction.channel.createMessageComponentCollector();
-            collecter.on('collect', async i => {
-                if (i.customId == "yes") {
-                    i.deferUpdate();
-                    let data = require("../data/data.json");
-                    data.guilds[interaction.guild.id].vote.voter[i.user.id] = "o";
-                    json_update(data, 0);
-                } else if (i.customId == "no") {
-                    i.deferUpdate();
-                    let data = require("../data/data.json");
-                    data.guilds[interaction.guild.id].vote.voter[i.user.id] = "x";
-                    json_update(data, 0);
-                }
-            })
 
-            /**
-             * voter를 array가 아닌 dict 형식으로 변환하고 다시 코딩 요망,
-             * 지금 개 피곤해서 이렇게 커밋 올리겠음
-             * 학교의 내가 잘 해주도록!
-             */
-            
-        } else if (subcommand == "마감") {
+            let options = [];
+            for (let i = 0; i < data.guilds[interaction.guild.id].votes.length; i++) {
+                const vote = data.guilds[interaction.guild.id].votes[i];
+                options[i] = {
+                    label: vote.topic,
+                    description: `찬성 : ${Object.values(vote.voter).filter(a => a == "o").length}명 반대 : ${Object.values(vote.voter).filter(a => a == "x").length}명`,
+                    value: i.toString()
+                }
+            }
+            const select = new MessageActionRow({
+                components: [
+                    new MessageSelectMenu({
+                        custom_id: "load_vote",
+                        placeholder: "불러올 투표를 선택해주세요!",
+                        options: options
+                    }),
+                ]
+            });
+            await interaction.reply({ components: [select]});
+            const filter = (i) => { return i.user.id === interaction.user.id; };
+            interaction.channel.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 20000})
+                .then(async _interaction => {
+                    interaction.deleteReply();
+                    const index = Number(_interaction.values[0]);
+                    const msg = await interaction.channel.send(create_vote(interaction, index, data));
+                    const collecter = interaction.channel.createMessageComponentCollector();
+                    collecter.on('collect', async i => {
+                        if (i.customId == `yes${index}`) {
+                            i.deferUpdate();
+                            let data = require("../data/data.json");
+                            data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "o";
+                            await msg.edit(create_vote(interaction, index, data));
+                            json_update(data, 0);
+                        } else if (i.customId == `no${index}`) {
+                            i.deferUpdate();
+                            let data = require("../data/data.json");
+                            data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
+                            await msg.edit(create_vote(interaction, index, data));
+                            json_update(data, 0);
+                        }
+                    });
+                }).catch(async () => {
+                    await interaction.editReply({ content: "명령어가 만료되었습니다", components: []})
+                })
         }
     }
 }
