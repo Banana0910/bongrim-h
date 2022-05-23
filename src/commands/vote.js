@@ -1,4 +1,5 @@
 const { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } = require("discord.js");
+const { json_update } = require("../api/drive/drive");
 
 module.exports = {
     name: "vote",
@@ -14,7 +15,7 @@ module.exports = {
             if (!data.guilds[interaction.guild.id].votes)
                 data.guilds[interaction.guild.id].votes = [];
 
-            data.guilds[interaction.guild.id].push({ topic, author: interaction.user.id, voter: [] });
+            data.guilds[interaction.guild.id].push({ topic, author: interaction.user.id, voter: {} });
 
             const index = data.guilds[interaction.guild.id].votes.length;
             const btns = new MessageActionRow({
@@ -32,12 +33,14 @@ module.exports = {
                     title: `**${vote.topic}**`,
                     fileds: [
                         { 
-                            name: `**찬성 [${vote.voter.filter(i => i.answer == "o").length}명]**`, 
-                            value: vote.voter.filter(i => i.answer == "o").map(id => (interaction.guild.members.cache.get(id).user.tag)).join("\n")
+                            name: `**찬성 [${Object.values(vote.voter).filter(a => a == "o").length}명]**`, 
+                            value: Object.keys(vote.voter).filter(k => vote.voter[k] == "o")
+                                .map(id => (interaction.guild.members.cache.get(id).user.tag)).join('\n')
                         },
                         {
                             name: `**반대 [${vote.voter.filter(i => i.answer == "x").length}명]**`, 
-                            value: vote.voter.filter(i => i.answer == "x").map(id => (interaction.guild.members.cache.get(id).user.tag)).join("\n")
+                            value: Object.keys(vote.voter).filter(k => vote.voter[k] == "x")
+                                .map(id => (interaction.guild.members.cache.get(id).user.tag)).join('\n')
                         }
                     ]
                 });
@@ -48,12 +51,13 @@ module.exports = {
                 if (i.customId == "yes") {
                     i.deferUpdate();
                     let data = require("../data/data.json");
-                    if (!data.guilds[i.guild.id].vote.voter.find(user => user.id == i.user.id && user.answer == "o")) {
-                        data.guilds[i.guild.id].vote.voter
-                    }
+                    data.guilds[interaction.guild.id].vote.voter[i.user.id] = "o";
+                    json_update(data, 0);
                 } else if (i.customId == "no") {
                     i.deferUpdate();
                     let data = require("../data/data.json");
+                    data.guilds[interaction.guild.id].vote.voter[i.user.id] = "x";
+                    json_update(data, 0);
                 }
             })
 
