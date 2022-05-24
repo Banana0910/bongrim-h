@@ -58,8 +58,10 @@ module.exports = {
             data.guilds[interaction.guild.id].votes.push({ topic, author: interaction.user.id, voter: {} });
             json_update(data, 0);
 
+            await interaction.deferReply();
+            await interaction.deleteReply();
             const index = data.guilds[interaction.guild.id].votes.length-1;
-            const msg = await interaction.reply(create_vote(interaction, index, data));
+            const msg = await interaction.channel.send(create_vote(interaction, index, data));
             const collecter = interaction.channel.createMessageComponentCollector();
             collecter.on('collect', async i => {
                 if (i.customId == `yes${index}`) {
