@@ -73,7 +73,7 @@ bot.once('ready', async () =>  {
         setInterval(change_activity, 5000);
         console.log(`${bot.user.tag} 로그인 함!`);
         bot.user.setActivity(`정비`, { type: "PLAYING" });
-        await send_log(`**┌─── [${now.toISOString().split('T')[0]} ${now.toTimeString().split(' ')[0]}] 봇 시작 ───┐**`);
+        // await send_log(`**┌─── [${now.toISOString().split('T')[0]} ${now.toTimeString().split(' ')[0]}] 봇 시작 ───┐**`);
         getinf();
         let data = require('./data/data.json');
         await Promise.all(bot.guilds.cache.map((guild) => {
