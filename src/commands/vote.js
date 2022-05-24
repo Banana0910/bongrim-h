@@ -153,7 +153,7 @@ module.exports = {
                     if (data.guilds[interaction.guild.id].votes.length-1 == 0) {
                         delete data.guilds[interaction.guild.id].votes;
                     } else {
-                        data.guilds[interaction.guild.id].votes = data.guilds[interaction.guild.id].votes.slice(index, 1);
+                        data.guilds[interaction.guild.id].votes.splice(index, 1);
                     }
                     json_update(data, 0);
                 }).catch(async () => {
