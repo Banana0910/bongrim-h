@@ -65,33 +65,33 @@ module.exports = {
                 if (i.customId == `yes${index}`) {
                     i.deferUpdate();
                     let data = require("../data/data.json");
-                    if (data.guilds[interaction.guild.id].votes || data.guilds[interaction.guild.id].votes[index]) {
-                        data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "o";
-                        await msg.edit(create_vote(interaction, index, data));
-                        json_update(data, 0);
-                    } else {
-                        await msg.delete();
-                    }
+                    if (data.guilds[interaction.guild.id].votes) {
+                        if (!data.guilds[interaction.guild.id].votes[index]) 
+                            await msg.delete();
+                    } else { await msg.delete(); }
+                    data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "o";
+                    await msg.edit(create_vote(interaction, index, data));
+                    json_update(data, 0);
                 } else if (i.customId == `no${index}`) {
                     i.deferUpdate();
                     let data = require("../data/data.json");
-                    if (data.guilds[interaction.guild.id].votes || data.guilds[interaction.guild.id].votes[index]) {
-                        data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
-                        await msg.edit(create_vote(interaction, index, data));
-                        json_update(data, 0);
-                    } else {
-                        await msg.delete();
-                    }
+                    if (data.guilds[interaction.guild.id].votes) {
+                        if (!data.guilds[interaction.guild.id].votes[index]) 
+                            await msg.delete();
+                    } else { await msg.delete(); }
+                    data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
+                    await msg.edit(create_vote(interaction, index, data));
+                    json_update(data, 0);
                 } else if (i.customId == `giveup${index}`) {
                     i.deferUpdate();
                     let data = require("../data/data.json");
-                    if (data.guilds[interaction.guild.id].votes || data.guilds[interaction.guild.id].votes[index]) {
-                        delete data.guilds[interaction.guild.id].votes[index].voter[i.user.id];
-                        await msg.edit(create_vote(interaction, index, data));
-                        json_update(data, 0);
-                    } else {
-                        await msg.delete();
-                    }
+                    if (data.guilds[interaction.guild.id].votes) {
+                        if (!data.guilds[interaction.guild.id].votes[index]) 
+                            await msg.delete();
+                    } else { await msg.delete(); }
+                    delete data.guilds[interaction.guild.id].votes[index].voter[i.user.id];
+                    await msg.edit(create_vote(interaction, index, data));
+                    json_update(data, 0);
                 }
             });
         } else if (subcommand == "마감") {
@@ -156,7 +156,8 @@ module.exports = {
                                 inline: true
                             }
                         ],
-                        color: _interaction.member.displayHexColor
+                        color: _interaction.member.displayHexColor,
+                        footer: { text: _interaction.guild.name, iconURL: _interaction.guild.iconURL() }
                     })
                     await interaction.editReply({ embeds: [embed], components: [] });
                     if (data.guilds[interaction.guild.id].votes.length-1 == 0) {
@@ -206,33 +207,33 @@ module.exports = {
                         if (i.customId == `yes${index}`) {
                             i.deferUpdate();
                             let data = require("../data/data.json");
-                            if (data.guilds[interaction.guild.id].votes || data.guilds[interaction.guild.id].votes[index]) {
-                                data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "o";
-                                await msg.edit(create_vote(interaction, index, data));
-                                json_update(data, 0);
-                            } else {
-                                await msg.delete();
-                            }
+                            if (data.guilds[interaction.guild.id].votes) {
+                                if (!data.guilds[interaction.guild.id].votes[index]) 
+                                    await msg.delete();
+                            } else { await msg.delete(); }
+                            data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "o";
+                            await msg.edit(create_vote(interaction, index, data));
+                            json_update(data, 0);
                         } else if (i.customId == `no${index}`) {
                             i.deferUpdate();
                             let data = require("../data/data.json");
-                            if (data.guilds[interaction.guild.id].votes || data.guilds[interaction.guild.id].votes[index]) {
-                                data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
-                                await msg.edit(create_vote(interaction, index, data));
-                                json_update(data, 0);
-                            } else {
-                                await msg.delete();
-                            }
+                            if (data.guilds[interaction.guild.id].votes) {
+                                if (!data.guilds[interaction.guild.id].votes[index]) 
+                                    await msg.delete();
+                            } else { await msg.delete(); }
+                            data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
+                            await msg.edit(create_vote(interaction, index, data));
+                            json_update(data, 0);
                         } else if (i.customId == `giveup${index}`) {
                             i.deferUpdate();
                             let data = require("../data/data.json");
-                            if (data.guilds[interaction.guild.id].votes || data.guilds[interaction.guild.id].votes[index]) {
-                                delete data.guilds[interaction.guild.id].votes[index].voter[i.user.id];
-                                await msg.edit(create_vote(interaction, index, data));
-                                json_update(data, 0);
-                            } else {
-                                await msg.delete();
-                            }
+                            if (data.guilds[interaction.guild.id].votes) {
+                                if (!data.guilds[interaction.guild.id].votes[index]) 
+                                    await msg.delete();
+                            } else { await msg.delete(); }
+                            delete data.guilds[interaction.guild.id].votes[index].voter[i.user.id];
+                            await msg.edit(create_vote(interaction, index, data));
+                            json_update(data, 0);
                         }
                     });
                 }).catch(async () => {
