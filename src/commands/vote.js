@@ -65,7 +65,7 @@ module.exports = {
                 if (i.customId == `yes${index}`) {
                     i.deferUpdate();
                     let data = require("../data/data.json");
-                    if (data.guilds[interaction.guild.id].votes[index]) {
+                    if (data.guilds[interaction.guild.id].votes || data.guilds[interaction.guild.id].votes[index]) {
                         data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "o";
                         await msg.edit(create_vote(interaction, index, data));
                         json_update(data, 0);
@@ -75,7 +75,7 @@ module.exports = {
                 } else if (i.customId == `no${index}`) {
                     i.deferUpdate();
                     let data = require("../data/data.json");
-                    if (data.guilds[interaction.guild.id].votes[index]) {
+                    if (data.guilds[interaction.guild.id].votes || data.guilds[interaction.guild.id].votes[index]) {
                         data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
                         await msg.edit(create_vote(interaction, index, data));
                         json_update(data, 0);
@@ -85,7 +85,7 @@ module.exports = {
                 } else if (i.customId == `giveup${index}`) {
                     i.deferUpdate();
                     let data = require("../data/data.json");
-                    if (data.guilds[interaction.guild.id].votes[index]) {
+                    if (data.guilds[interaction.guild.id].votes || data.guilds[interaction.guild.id].votes[index]) {
                         delete data.guilds[interaction.guild.id].votes[index].voter[i.user.id];
                         await msg.edit(create_vote(interaction, index, data));
                         json_update(data, 0);
@@ -206,7 +206,7 @@ module.exports = {
                         if (i.customId == `yes${index}`) {
                             i.deferUpdate();
                             let data = require("../data/data.json");
-                            if (data.guilds[interaction.guild.id].votes[index]) {
+                            if (data.guilds[interaction.guild.id].votes || data.guilds[interaction.guild.id].votes[index]) {
                                 data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "o";
                                 await msg.edit(create_vote(interaction, index, data));
                                 json_update(data, 0);
@@ -216,7 +216,7 @@ module.exports = {
                         } else if (i.customId == `no${index}`) {
                             i.deferUpdate();
                             let data = require("../data/data.json");
-                            if (data.guilds[interaction.guild.id].votes[index]) {
+                            if (data.guilds[interaction.guild.id].votes || data.guilds[interaction.guild.id].votes[index]) {
                                 data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
                                 await msg.edit(create_vote(interaction, index, data));
                                 json_update(data, 0);
@@ -226,7 +226,7 @@ module.exports = {
                         } else if (i.customId == `giveup${index}`) {
                             i.deferUpdate();
                             let data = require("../data/data.json");
-                            if (data.guilds[interaction.guild.id].votes[index]) {
+                            if (data.guilds[interaction.guild.id].votes || data.guilds[interaction.guild.id].votes[index]) {
                                 delete data.guilds[interaction.guild.id].votes[index].voter[i.user.id];
                                 await msg.edit(create_vote(interaction, index, data));
                                 json_update(data, 0);
