@@ -51,7 +51,6 @@ module.exports = {
         if (subcommand == "생성") {
             const topic = interaction.options.getString("주제");
 
-            interaction.deferReply();
             if (!data.guilds[interaction.guild.id].votes)
                 data.guilds[interaction.guild.id].votes = [];
 
@@ -59,7 +58,7 @@ module.exports = {
             json_update(data, 0);
 
             const index = data.guilds[interaction.guild.id].votes.length-1;
-            const msg = await interaction.channel.send(create_vote(interaction, index, data));
+            const msg = await interaction.reply(create_vote(interaction, index, data));
             const collecter = interaction.channel.createMessageComponentCollector();
             collecter.on('collect', async i => {
                 if (i.customId == `yes${index}`) {
@@ -121,7 +120,6 @@ module.exports = {
                         return;
                     }
                     const vote = data.guilds[interaction.guild.id].votes[index];
-                    console.log(vote);
                     const yes_length = Object.values(vote.voter).filter(a => a == "o").length;
                     const no_length = Object.values(vote.voter).filter(a => a == "x").length;
                     const get_list = (condition, bold) => {
@@ -131,7 +129,7 @@ module.exports = {
                         return (output != "") ? output : "없음";
                     }
                     const embed = new MessageEmbed({
-                        title: `${vote.topic}의 결과\n${(yes_length > no_length) ? ((yes_length == no_length) ? "비겼습니다!" 
+                        title: `${vote.topic}의 결과\n${(yes_length >= no_length) ? ((yes_length == no_length) ? "비겼습니다!" 
                             : `${yes_length - no_length}표차로 찬성 승리!`) 
                             : `${no_length - yes_length}표차로 반대 승리!`}`,
                         author: { name: `${_interaction.user.username}님의 투표 결과`, iconURL: _interaction.user.displayAvatarURL() },
