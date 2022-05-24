@@ -115,11 +115,12 @@ module.exports = {
             const filter = (i) => { return i.user.id === interaction.user.id; };
             interaction.channel.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 20000})
                 .then(async _interaction => {
-                    if (_interaction.user.id != data.guilds[interaction.guild.id].votes[_interaction.values[0]].author) {
+                    const index = Number(_interaction.values[0]);
+                    if (_interaction.user.id != data.guilds[interaction.guild.id].votes[index].author) {
                         await interaction.editReply({ content: "오직 개최자만이 투표를 마감할 수 있습니다", components: [] });
                         return;
                     }
-                    const vote = data.guilds[interaction.guild.id].votes[_interaction.values[0]];
+                    const vote = data.guilds[interaction.guild.id].votes[index];
                     const yes_length = Object.values(vote.voter).filter(a => a == "o").length;
                     const no_length = Object.values(vote.voter).filter(a => a == "x").length;
                     const get_list = (condition, bold) => {
@@ -151,7 +152,7 @@ module.exports = {
                     if (data.guilds[interaction.guild.id].votes.length-1 == 0) {
                         delete data.guilds[interaction.guild.id].votes;
                     } else {
-                        data.guilds[interaction.guild.id].votes.slice(_interaction.values[0], 1);
+                        data.guilds[interaction.guild.id].votes.slice(index, 1);
                     }
                     json_update(data, 0);
                 }).catch(async () => {
