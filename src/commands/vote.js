@@ -23,13 +23,13 @@ module.exports = {
                         title: `**${vote.topic}**`,
                         fields: [
                             { 
-                                name: `**찬성 [${Object.values(vote.voter).filter(a => a == "o").length}명]**`, 
-                                value: get_list("o"),
+                                name: `**찬성 [${Object.values(vote.voter).filter(a => a == 0).length}명]**`, 
+                                value: get_list(0),
                                 inline: true
                             },
                             {
-                                name: `**반대 [${Object.values(vote.voter).filter(a => a == "x").length}명]**`, 
-                                value: get_list("x"),
+                                name: `**반대 [${Object.values(vote.voter).filter(a => a == 1).length}명]**`, 
+                                value: get_list(1),
                                 inline: true
                             }
                         ],
@@ -69,7 +69,7 @@ module.exports = {
                         if (!data.guilds[interaction.guild.id].votes[index]) 
                             await msg.delete();
                     } else { await msg.delete(); }
-                    data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "o";
+                    data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = 0;
                     await msg.edit(create_vote(interaction, index, data));
                     json_update(data, 0);
                 } else if (i.customId == `no${index}`) {
@@ -79,7 +79,7 @@ module.exports = {
                         if (!data.guilds[interaction.guild.id].votes[index]) 
                             await msg.delete();
                     } else { await msg.delete(); }
-                    data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
+                    data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = 1;
                     await msg.edit(create_vote(interaction, index, data));
                     json_update(data, 0);
                 } else if (i.customId == `giveup${index}`) {
@@ -106,8 +106,8 @@ module.exports = {
                 options[i] = {
                     label: vote.topic,
                     description: `개최자 : ${interaction.guild.members.cache.get(vote.author).user.tag} | 
-                        찬성 : ${Object.values(vote.voter).filter(a => a == "o").length}명 | 
-                        반대 : ${Object.values(vote.voter).filter(a => a == "x").length}명`,
+                        찬성 : ${Object.values(vote.voter).filter(a => a == 0).length}명 | 
+                        반대 : ${Object.values(vote.voter).filter(a => a == 1).length}명`,
                     value: i.toString()
                 }
             }
@@ -131,8 +131,8 @@ module.exports = {
                         return;
                     }
                     const vote = data.guilds[interaction.guild.id].votes[index];
-                    const yes_length = Object.values(vote.voter).filter(a => a == "o").length;
-                    const no_length = Object.values(vote.voter).filter(a => a == "x").length;
+                    const yes_length = Object.values(vote.voter).filter(a => a == 0).length;
+                    const no_length = Object.values(vote.voter).filter(a => a == 1).length;
                     const get_list = (condition, bold) => {
                         const output = Object.keys(vote.voter).filter(k => vote.voter[k] == condition)
                             .map(id => ((bold) ? `**${interaction.guild.members.cache.get(id).user.tag}**` : interaction.guild.members.cache.get(id).user.tag))
@@ -146,13 +146,13 @@ module.exports = {
                         author: { name: `${_interaction.user.username}님의 투표 결과`, iconURL: _interaction.user.displayAvatarURL() },
                         fields: [
                             { 
-                                name: `**찬성 [${Object.values(vote.voter).filter(a => a == "o").length}명]**`, 
-                                value: get_list("o", (yes_length > no_length) ? true : false),
+                                name: `**찬성 [${Object.values(vote.voter).filter(a => a == 0).length}명]**`, 
+                                value: get_list(0, (yes_length > no_length) ? true : false),
                                 inline: true
                             },
                             {
-                                name: `**반대 [${Object.values(vote.voter).filter(a => a == "x").length}명]**`, 
-                                value: get_list("x", (no_length > yes_length) ? true : false),
+                                name: `**반대 [${Object.values(vote.voter).filter(a => a == 1).length}명]**`, 
+                                value: get_list(1, (no_length > yes_length) ? true : false),
                                 inline: true
                             }
                         ],
@@ -181,8 +181,8 @@ module.exports = {
                 options[i] = {
                     label: vote.topic,
                     description: `개최자 : ${interaction.guild.members.cache.get(vote.author).user.tag} | 
-                        찬성 : ${Object.values(vote.voter).filter(a => a == "o").length}명 | 
-                        반대 : ${Object.values(vote.voter).filter(a => a == "x").length}명`,
+                        찬성 : ${Object.values(vote.voter).filter(a => a == 0).length}명 | 
+                        반대 : ${Object.values(vote.voter).filter(a => a == 1).length}명`,
                     value: i.toString()
                 }
             }
@@ -211,7 +211,7 @@ module.exports = {
                                 if (!data.guilds[interaction.guild.id].votes[index]) 
                                     await msg.delete();
                             } else { await msg.delete(); }
-                            data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "o";
+                            data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = 0;
                             await msg.edit(create_vote(interaction, index, data));
                             json_update(data, 0);
                         } else if (i.customId == `no${index}`) {
@@ -221,7 +221,7 @@ module.exports = {
                                 if (!data.guilds[interaction.guild.id].votes[index]) 
                                     await msg.delete();
                             } else { await msg.delete(); }
-                            data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
+                            data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = 1;
                             await msg.edit(create_vote(interaction, index, data));
                             json_update(data, 0);
                         } else if (i.customId == `giveup${index}`) {
