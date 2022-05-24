@@ -153,6 +153,7 @@ module.exports = {
                     } else {
                         data.guilds[interaction.guild.id].votes.slice(_interaction.values[0], 1);
                     }
+                    json_update(data, 0);
                 }).catch(async () => {
                     await interaction.editReply({ content: "명령어가 만료되었습니다", components: []})
                 })
