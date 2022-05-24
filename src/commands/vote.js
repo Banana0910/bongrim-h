@@ -131,8 +131,8 @@ module.exports = {
                         return (output != "") ? output : "없음";
                     }
                     const embed = new MessageEmbed({
-                        title: `${vote.topic}의 결과\n${(yes_length > no_length) ? (yes_length == no_length) ? "비겼습니다!" 
-                            : `${yes_length - no_length}표차로 찬성 승리!` 
+                        title: `${vote.topic}의 결과\n${(yes_length > no_length) ? ((yes_length == no_length) ? "비겼습니다!" 
+                            : `${yes_length - no_length}표차로 찬성 승리!`) 
                             : `${no_length - yes_length}표차로 반대 승리!`}`,
                         author: { name: `${_interaction.user.username}님의 투표 결과`, iconURL: _interaction.user.displayAvatarURL() },
                         fields: [
