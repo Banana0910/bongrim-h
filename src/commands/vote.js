@@ -121,6 +121,7 @@ module.exports = {
                         return;
                     }
                     const vote = data.guilds[interaction.guild.id].votes[index];
+                    console.log(vote);
                     const yes_length = Object.values(vote.voter).filter(a => a == "o").length;
                     const no_length = Object.values(vote.voter).filter(a => a == "x").length;
                     const get_list = (condition, bold) => {
@@ -152,7 +153,7 @@ module.exports = {
                     if (data.guilds[interaction.guild.id].votes.length-1 == 0) {
                         delete data.guilds[interaction.guild.id].votes;
                     } else {
-                        data.guilds[interaction.guild.id].votes.slice(index, 1);
+                        data.guilds[interaction.guild.id].votes = data.guilds[interaction.guild.id].votes.slice(index, 1);
                     }
                     json_update(data, 0);
                 }).catch(async () => {
