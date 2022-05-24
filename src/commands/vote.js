@@ -65,15 +65,23 @@ module.exports = {
                 if (i.customId == `yes${index}`) {
                     i.deferUpdate();
                     let data = require("../data/data.json");
-                    data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "o";
-                    await msg.edit(create_vote(interaction, index, data));
-                    json_update(data, 0);
+                    if (data.guilds[interaction.guild.id].votes[index]) {
+                        data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "o";
+                        await msg.edit(create_vote(interaction, index, data));
+                        json_update(data, 0);
+                    } else {
+                        await msg.delete();
+                    }
                 } else if (i.customId == `no${index}`) {
                     i.deferUpdate();
                     let data = require("../data/data.json");
-                    data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
-                    await msg.edit(create_vote(interaction, index, data));
-                    json_update(data, 0);
+                    if (data.guilds[interaction.guild.id].votes[index]) {
+                        data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
+                        await msg.edit(create_vote(interaction, index, data));
+                        json_update(data, 0);
+                    } else {
+                        await msg.delete();
+                    }
                 }
             });
         } else if (subcommand == "마감") {
@@ -87,7 +95,9 @@ module.exports = {
                 const vote = data.guilds[interaction.guild.id].votes[i];
                 options[i] = {
                     label: vote.topic,
-                    description: `찬성 : ${Object.values(vote.voter).filter(a => a == "o").length}명 반대 : ${Object.values(vote.voter).filter(a => a == "x").length}명`,
+                    description: `개최자 : ${interaction.guild.members.cache.get(vote.author).user.tag} | 
+                        찬성 : ${Object.values(vote.voter).filter(a => a == "o").length}명 | 
+                        반대 : ${Object.values(vote.voter).filter(a => a == "x").length}명`,
                     value: i.toString()
                 }
             }
@@ -105,25 +115,44 @@ module.exports = {
             const filter = (i) => { return i.user.id === interaction.user.id; };
             interaction.channel.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 20000})
                 .then(async _interaction => {
-                    interaction.deleteReply();
-                    const index = Number(_interaction.values[0]);
-                    const msg = await interaction.channel.send(create_vote(interaction, index, data));
-                    const collecter = interaction.channel.createMessageComponentCollector();
-                    collecter.on('collect', async i => {
-                        if (i.customId == `yes${index}`) {
-                            i.deferUpdate();
-                            let data = require("../data/data.json");
-                            data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "o";
-                            await msg.edit(create_vote(interaction, index, data));
-                            json_update(data, 0);
-                        } else if (i.customId == `no${index}`) {
-                            i.deferUpdate();
-                            let data = require("../data/data.json");
-                            data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
-                            await msg.edit(create_vote(interaction, index, data));
-                            json_update(data, 0);
-                        }
-                    });
+                    if (_interaction.user.id != data.guilds[interaction.guild.id].votes[_interaction.values[0]].author) {
+                        await interaction.editReply({ content: "오직 개최자만이 투표를 마감할 수 있습니다", components: [] });
+                        return;
+                    }
+                    const vote = data.guilds[interaction.guild.id].votes[_interaction.values[0]];
+                    const yes_length = Object.values(vote.voter).filter(a => a == "o").length;
+                    const no_length = Object.values(vote.voter).filter(a => a == "x").length;
+                    const get_list = (condition, bold) => {
+                        const output = Object.keys(vote.voter).filter(k => vote.voter[k] == condition)
+                            .map(id => ((bold) ? `**${interaction.guild.members.cache.get(id).user.tag}**` : interaction.guild.members.cache.get(id).user.tag))
+                            .join('\n')
+                        return (output != "") ? output : "없음";
+                    }
+                    const embed = new MessageEmbed({
+                        title: `${vote.topic}의 결과\n${(yes_length > no_length) ? (yes_length == no_length) ? "비겼습니다!" 
+                            : `${yes_length - no_length}표차로 찬성 승리!` 
+                            : `${no_length - yes_length}표차로 반대 승리!`}`,
+                        author: { name: `${_interaction.user.username}님의 투표 결과`, iconURL: _interaction.user.displayAvatarURL() },
+                        fields: [
+                            { 
+                                name: `**찬성 [${Object.values(vote.voter).filter(a => a == "o").length}명]**`, 
+                                value: get_list("o", (yes_length > no_length) ? true : false),
+                                inline: true
+                            },
+                            {
+                                name: `**반대 [${Object.values(vote.voter).filter(a => a == "x").length}명]**`, 
+                                value: get_list("x", (no_length > yes_length) ? true : false),
+                                inline: true
+                            }
+                        ],
+                        color: _interaction.member.displayHexColor
+                    })
+                    await interaction.editReply({ embeds: [embed], components: [] });
+                    if (data.guilds[interaction.guild.id].votes.length-1 == 0) {
+                        delete data.guilds[interaction.guild.id].votes;
+                    } else {
+                        data.guilds[interaction.guild.id].votes.slice(_interaction.values[0], 1);
+                    }
                 }).catch(async () => {
                     await interaction.editReply({ content: "명령어가 만료되었습니다", components: []})
                 })
@@ -138,7 +167,9 @@ module.exports = {
                 const vote = data.guilds[interaction.guild.id].votes[i];
                 options[i] = {
                     label: vote.topic,
-                    description: `찬성 : ${Object.values(vote.voter).filter(a => a == "o").length}명 반대 : ${Object.values(vote.voter).filter(a => a == "x").length}명`,
+                    description: `개최자 : ${interaction.guild.members.cache.get(vote.author).user.tag} | 
+                        찬성 : ${Object.values(vote.voter).filter(a => a == "o").length}명 | 
+                        반대 : ${Object.values(vote.voter).filter(a => a == "x").length}명`,
                     value: i.toString()
                 }
             }
@@ -163,15 +194,23 @@ module.exports = {
                         if (i.customId == `yes${index}`) {
                             i.deferUpdate();
                             let data = require("../data/data.json");
-                            data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "o";
-                            await msg.edit(create_vote(interaction, index, data));
-                            json_update(data, 0);
+                            if (data.guilds[interaction.guild.id].votes[index]) {
+                                data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "o";
+                                await msg.edit(create_vote(interaction, index, data));
+                                json_update(data, 0);
+                            } else {
+                                await msg.delete();
+                            }
                         } else if (i.customId == `no${index}`) {
                             i.deferUpdate();
                             let data = require("../data/data.json");
-                            data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
-                            await msg.edit(create_vote(interaction, index, data));
-                            json_update(data, 0);
+                            if (data.guilds[interaction.guild.id].votes[index]) {
+                                data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
+                                await msg.edit(create_vote(interaction, index, data));
+                                json_update(data, 0);
+                            } else {
+                                await msg.delete();
+                            }
                         }
                     });
                 }).catch(async () => {
