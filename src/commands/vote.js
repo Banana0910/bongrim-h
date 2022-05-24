@@ -41,7 +41,8 @@ module.exports = {
                     new MessageActionRow({
                         components: [
                             new MessageButton({ customId: `yes${index}`, label: "찬성", style: 'SUCCESS' }),
-                            new MessageButton({ customId: `no${index}`, label: "반대", style: 'DANGER' })
+                            new MessageButton({ customId: `no${index}`, label: "반대", style: 'DANGER' }),
+                            new MessageButton({ customId: `giveup${index}`, label: "기권", style: 'PRIMARY'})
                         ]
                     })
                 ]
@@ -76,6 +77,16 @@ module.exports = {
                     let data = require("../data/data.json");
                     if (data.guilds[interaction.guild.id].votes[index]) {
                         data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
+                        await msg.edit(create_vote(interaction, index, data));
+                        json_update(data, 0);
+                    } else {
+                        await msg.delete();
+                    }
+                } else if (i.customId == `giveup${index}`) {
+                    i.deferUpdate();
+                    let data = require("../data/data.json");
+                    if (data.guilds[interaction.guild.id].votes[index]) {
+                        delete data.guilds[interaction.guild.id].votes[index].voter[i.user.id];
                         await msg.edit(create_vote(interaction, index, data));
                         json_update(data, 0);
                     } else {
@@ -207,6 +218,16 @@ module.exports = {
                             let data = require("../data/data.json");
                             if (data.guilds[interaction.guild.id].votes[index]) {
                                 data.guilds[interaction.guild.id].votes[index].voter[i.user.id] = "x";
+                                await msg.edit(create_vote(interaction, index, data));
+                                json_update(data, 0);
+                            } else {
+                                await msg.delete();
+                            }
+                        } else if (i.customId == `giveup${index}`) {
+                            i.deferUpdate();
+                            let data = require("../data/data.json");
+                            if (data.guilds[interaction.guild.id].votes[index]) {
+                                delete data.guilds[interaction.guild.id].votes[index].voter[i.user.id];
                                 await msg.edit(create_vote(interaction, index, data));
                                 json_update(data, 0);
                             } else {
