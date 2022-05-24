@@ -51,6 +51,7 @@ module.exports = {
         if (subcommand == "생성") {
             const topic = interaction.options.getString("주제");
 
+            interaction.deferReply();
             if (!data.guilds[interaction.guild.id].votes)
                 data.guilds[interaction.guild.id].votes = [];
 
@@ -58,7 +59,6 @@ module.exports = {
             json_update(data, 0);
 
             const index = data.guilds[interaction.guild.id].votes.length-1;
-
             const msg = await interaction.channel.send(create_vote(interaction, index, data));
             const collecter = interaction.channel.createMessageComponentCollector();
             collecter.on('collect', async i => {

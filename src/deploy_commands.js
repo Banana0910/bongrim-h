@@ -351,7 +351,7 @@ client.createCommand({
                     description: "투표의 주제를 입력합니다",
                     type: 3,
                     required: true
-                }
+                } 
             ]
         },
         {
