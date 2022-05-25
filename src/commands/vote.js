@@ -16,8 +16,8 @@ module.exports = {
             const no_length = Object.values(vote.voter).filter(a => a == 1).length;
             const all_length = Object.values(vote.voter).length;
 
-            const yes_bar = (yes_length + no_length == 0) ? 5 : yes_length * 10 / all_length;
-            const no_bar = (yes_length + no_length == 0) ? 5 : no_length * 10 / all_length;
+            const yes_bar = Math.round((yes_length + no_length == 0) ? 5 : yes_length * 10 / all_length);
+            const no_bar = Math.round((yes_length + no_length == 0) ? 5 : no_length * 10 / all_length);
 
             const get_list = (condition) => {
                 const output = Object.keys(vote.voter).filter(k => vote.voter[k] == condition)
@@ -42,9 +42,9 @@ module.exports = {
                             }
                         ],
                         description: `■ = 찬성 | □ = 반대 | ${(vote.secret == 1) ? "공개투표" : "비밀투표"}\n`
-                            + `${(yes_length + no_length == 0) ? 50 : yes_length / all_length * 100}%⠀`
+                            + `${(yes_length + no_length == 0) ? 50 : Math.round(yes_length / all_length * 100)}%⠀`
                             + `${'■'.repeat(yes_bar)}${'□'.repeat(no_bar)}`
-                            + `⠀${(yes_length + no_length == 0) ? 50 : no_length / all_length * 100}%`,
+                            + `⠀${(yes_length + no_length == 0) ? 50 : Math.round(no_length / all_length * 100)}%`,
                         color: author.displayHexColor,
                         footer: { text: interaction.guild.name, iconURL: interaction.guild.iconURL() }
                     })
@@ -151,8 +151,8 @@ module.exports = {
                     const no_length = Object.values(vote.voter).filter(a => a == 1).length;
                     const all_length = Object.values(vote.voter).length;
 
-                    const yes_bar = (yes_length + no_length == 0) ? 5 : yes_length * 10 / all_length;
-                    const no_bar = (yes_length + no_length == 0) ? 5 : no_length * 10 / all_length;
+                    const yes_bar = Math.round((yes_length + no_length == 0) ? 5 : yes_length * 10 / all_length);
+                    const no_bar = Math.round((yes_length + no_length == 0) ? 5 : no_length * 10 / all_length);
 
                     const get_list = (condition, bold) => {
                         const output = Object.keys(vote.voter).filter(k => vote.voter[k] == condition)
@@ -178,9 +178,9 @@ module.exports = {
                             }
                         ],
                         description: `■ = 찬성 | □ = 반대 | ${(vote.secret == 1) ? "공개투표" : "비밀투표"}\n`
-                            + `${(yes_length + no_length == 0) ? 50 : yes_length / all_length * 100}%⠀`
+                            + `${(yes_length + no_length == 0) ? 50 : Math.round(yes_length / all_length * 100)}%⠀`
                             + `${'■'.repeat(yes_bar)}${'□'.repeat(no_bar)}`
-                            + `⠀${(yes_length + no_length == 0) ? 50 : no_length / all_length * 100}%`,
+                            + `⠀${(yes_length + no_length == 0) ? 50 : Math.round(no_length / all_length * 100)}%`,
                         color: _interaction.member.displayHexColor,
                         footer: { text: _interaction.guild.name, iconURL: _interaction.guild.iconURL() }
                     })
