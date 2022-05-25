@@ -63,7 +63,7 @@ module.exports = {
         let data = require("../data/data.json");
         if (subcommand == "생성") {
             const topic = interaction.options.getString("주제");
-            const secret = interaction.options.getInteger("익명") || 1;
+            const secret = interaction.options.getInteger("비밀투표") || 1;
 
             if (!data.guilds[interaction.guild.id].votes)
                 data.guilds[interaction.guild.id].votes = [];
