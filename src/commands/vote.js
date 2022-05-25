@@ -141,8 +141,9 @@ module.exports = {
             interaction.channel.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 20000})
                 .then(async _interaction => {
                     const index = Number(_interaction.values[0]);
-                    if (_interaction.user.id != data.guilds[interaction.guild.id].votes[index].author) {
-                        await interaction.editReply({ content: "오직 개최자만이 투표를 마감할 수 있습니다", components: [] });
+                    if (_interaction.user.id != data.guilds[interaction.guild.id].votes[index].author ||
+                        !_interaction.member.permissions.has("ADMINISTRATOR")) {
+                        await interaction.editReply({ content: "오직 개최자거나 관리자만이 투표를 마감할 수 있습니다", components: [] });
                         return;
                     }
                     const vote = data.guilds[interaction.guild.id].votes[index];
