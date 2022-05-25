@@ -11,6 +11,14 @@ module.exports = {
         const create_vote = (interaction, index, data) => {
             const vote = data.guilds[interaction.guild.id].votes[index];
             const author = interaction.member;
+
+            const yes_length = Object.values(vote.voter).filter(a => a == 0).length;
+            const no_length = Object.values(vote.voter).filter(a => a == 1).length;
+            const all_length = Object.values(vote.voter).length;
+
+            const yes_bar = (yes_length + no_length == 0) ? 5 : yes_length * 10 / all_length;
+            const no_bar = (yes_length + no_length == 0) ? 5 : no_length * 10 / all_length;
+
             const get_list = (condition) => {
                 const output = Object.keys(vote.voter).filter(k => vote.voter[k] == condition)
                     .map(id => (interaction.guild.members.cache.get(id).user.tag)).join('\n')
@@ -23,16 +31,20 @@ module.exports = {
                         title: `**${vote.topic}**`,
                         fields: [
                             { 
-                                name: `**찬성 [${Object.values(vote.voter).filter(a => a == 0).length}명]**`, 
-                                value: get_list(0),
+                                name: `**찬성 [${yes_length}명]**`, 
+                                value: (vote.secret == 1) ? get_list(0) : "⠀",
                                 inline: true
                             },
                             {
-                                name: `**반대 [${Object.values(vote.voter).filter(a => a == 1).length}명]**`, 
-                                value: get_list(1),
+                                name: `**반대 [${no_length}명]**`, 
+                                value: (vote.secret == 1) ? get_list(1) : "⠀",
                                 inline: true
                             }
                         ],
+                        description: `■ = 찬성 | □ = 반대 | ${(vote.secret == 1) ? "공개투표" : "비밀투표"}\n`
+                            + `${(yes_length + no_length == 0) ? 50 : yes_length / all_length * 100}%⠀`
+                            + `${'■'.repeat(yes_bar)}${'□'.repeat(no_bar)}`
+                            + `⠀${(yes_length + no_length == 0) ? 50 : no_length / all_length * 100}%`,
                         color: author.displayHexColor,
                         footer: { text: interaction.guild.name, iconURL: interaction.guild.iconURL() }
                     })
@@ -51,11 +63,12 @@ module.exports = {
         let data = require("../data/data.json");
         if (subcommand == "생성") {
             const topic = interaction.options.getString("주제");
+            const secret = interaction.options.getInteger("익명") || 1;
 
             if (!data.guilds[interaction.guild.id].votes)
                 data.guilds[interaction.guild.id].votes = [];
 
-            data.guilds[interaction.guild.id].votes.push({ topic, author: interaction.user.id, voter: {} });
+            data.guilds[interaction.guild.id].votes.push({ topic, author: interaction.user.id, secret, voter: {} });
             json_update(data, 0);
 
             await interaction.deferReply();
@@ -133,8 +146,14 @@ module.exports = {
                         return;
                     }
                     const vote = data.guilds[interaction.guild.id].votes[index];
+
                     const yes_length = Object.values(vote.voter).filter(a => a == 0).length;
                     const no_length = Object.values(vote.voter).filter(a => a == 1).length;
+                    const all_length = Object.values(vote.voter).length;
+
+                    const yes_bar = (yes_length + no_length == 0) ? 5 : yes_length * 10 / all_length;
+                    const no_bar = (yes_length + no_length == 0) ? 5 : no_length * 10 / all_length;
+
                     const get_list = (condition, bold) => {
                         const output = Object.keys(vote.voter).filter(k => vote.voter[k] == condition)
                             .map(id => ((bold) ? `**${interaction.guild.members.cache.get(id).user.tag}**` : interaction.guild.members.cache.get(id).user.tag))
@@ -149,15 +168,19 @@ module.exports = {
                         fields: [
                             { 
                                 name: `**찬성 [${Object.values(vote.voter).filter(a => a == 0).length}명]**`, 
-                                value: get_list(0, (yes_length > no_length) ? true : false),
+                                value: (vote.secret == 1) ? get_list(0, (yes_length > no_length) ? true : false) : "⠀",
                                 inline: true
                             },
                             {
                                 name: `**반대 [${Object.values(vote.voter).filter(a => a == 1).length}명]**`, 
-                                value: get_list(1, (no_length > yes_length) ? true : false),
+                                value: (vote.secret == 1) ? get_list(1, (no_length > yes_length) ? true : false) : "⠀",
                                 inline: true
                             }
                         ],
+                        description: `■ = 찬성 | □ = 반대 | ${(vote.secret == 1) ? "공개투표" : "비밀투표"}\n`
+                            + `${(yes_length + no_length == 0) ? 50 : yes_length / all_length * 100}%⠀`
+                            + `${'■'.repeat(yes_bar)}${'□'.repeat(no_bar)}`
+                            + `⠀${(yes_length + no_length == 0) ? 50 : no_length / all_length * 100}%`,
                         color: _interaction.member.displayHexColor,
                         footer: { text: _interaction.guild.name, iconURL: _interaction.guild.iconURL() }
                     })

@@ -351,7 +351,22 @@ client.createCommand({
                     description: "투표의 주제를 입력합니다",
                     type: 3,
                     required: true
-                } 
+                },
+                {
+                    name: "비밀투표",
+                    description: "비밀투표로 진행합니다",
+                    type: 4,
+                    choices: [
+                        {
+                            name: "활성화",
+                            value: 0
+                        },
+                        {
+                            name: "비활성화",
+                            value: 1
+                        }
+                    ]
+                }
             ]
         },
         {
