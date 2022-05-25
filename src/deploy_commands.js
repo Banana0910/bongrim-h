@@ -355,17 +355,7 @@ client.createCommand({
                 {
                     name: "비밀투표",
                     description: "비밀투표로 진행합니다",
-                    type: 4,
-                    choices: [
-                        {
-                            name: "활성화",
-                            value: 0
-                        },
-                        {
-                            name: "비활성화",
-                            value: 1
-                        }
-                    ]
+                    type: 5,
                 }
             ]
         },
