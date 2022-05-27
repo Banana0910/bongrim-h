@@ -8,9 +8,12 @@ module.exports = {
      */
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
+        /**
+         * @param { CommandInteraction } interaction
+         */
         const create_vote = (interaction, index, data) => {
             const vote = data.guilds[interaction.guild.id].votes[index];
-            const author = interaction.member;
+            const author = interaction.guild.members.cache.get(vote.author);
 
             const yes_length = Object.values(vote.voter).filter(a => a == 0).length;
             const no_length = Object.values(vote.voter).filter(a => a == 1).length;
@@ -32,16 +35,16 @@ module.exports = {
                         fields: [
                             { 
                                 name: `**찬성 [${yes_length}명]**`, 
-                                value: (vote.secret == false) ? get_list(0) : "⠀",
+                                value: (vote.secret == true) ? "⠀" : get_list(0),
                                 inline: true
                             },
                             {
                                 name: `**반대 [${no_length}명]**`, 
-                                value: (vote.secret == false) ? get_list(1) : "⠀",
+                                value: (vote.secret == true) ? "⠀" : get_list(1),
                                 inline: true
                             }
                         ],
-                        description: `■ = 찬성 | □ = 반대 | ${(vote.secret == false) ? "공개투표" : "비밀투표"}\n`
+                        description: `■ = 찬성 | □ = 반대 | ${(vote.secret == true) ? "비밀투표" : "공개투표"}\n`
                             + `${(yes_length + no_length == 0) ? 50 : Math.round(yes_length / all_length * 100)}%⠀`
                             + `${'■'.repeat(yes_bar)}${'□'.repeat(no_bar)}`
                             + `⠀${(yes_length + no_length == 0) ? 50 : Math.round(no_length / all_length * 100)}%`,
@@ -120,9 +123,9 @@ module.exports = {
                 const vote = data.guilds[interaction.guild.id].votes[i];
                 options[i] = {
                     label: vote.topic,
-                    description: `개최자 : ${interaction.guild.members.cache.get(vote.author).user.tag} | ` 
-                        + `찬성 : ${Object.values(vote.voter).filter(a => a == 0).length}명 | `
-                        + `반대 : ${Object.values(vote.voter).filter(a => a == 1).length}명`,
+                    description: `개최자 : ${interaction.guild.members.cache.get(vote.author).user.tag} |`
+                    + ` 찬성 : ${Object.values(vote.voter).filter(a => a == 0).length}명 |`
+                    + ` 반대 : ${Object.values(vote.voter).filter(a => a == 1).length}명`,
                     value: i.toString()
                 }
             }
@@ -141,12 +144,14 @@ module.exports = {
             interaction.channel.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 20000})
                 .then(async _interaction => {
                     const index = Number(_interaction.values[0]);
-                    if (_interaction.user.id != data.guilds[interaction.guild.id].votes[index].author ||
-                        !_interaction.member.permissions.has("ADMINISTRATOR")) {
-                        await interaction.editReply({ content: "오직 개최자거나 관리자만이 투표를 마감할 수 있습니다", components: [] });
-                        return;
+                    if (_interaction.user.id != data.guilds[interaction.guild.id].votes[index].author) {
+                        if (!_interaction.member.permissions.has("ADMINISTRATOR")) {
+                            await interaction.editReply({ content: "오직 개최자거나 관리자만이 투표를 마감할 수 있습니다", components: [] });
+                            return;
+                        }
                     }
                     const vote = data.guilds[interaction.guild.id].votes[index];
+                    const author = interaction.guild.members.cache.get(vote.author);
 
                     const yes_length = Object.values(vote.voter).filter(a => a == 0).length;
                     const no_length = Object.values(vote.voter).filter(a => a == 1).length;
@@ -154,8 +159,6 @@ module.exports = {
 
                     const yes_bar = Math.round((yes_length + no_length == 0) ? 5 : yes_length * 10 / all_length);
                     const no_bar = Math.round((yes_length + no_length == 0) ? 5 : no_length * 10 / all_length);
-
-                    const author = _interaction.guild.members()
 
                     const get_list = (condition, bold) => {
                         const output = Object.keys(vote.voter).filter(k => vote.voter[k] == condition)
@@ -167,24 +170,24 @@ module.exports = {
                         title: `${vote.topic}의 결과\n${(yes_length >= no_length) ? ((yes_length == no_length) ? "비겼습니다!" 
                             : `${yes_length - no_length}표차로 찬성 승리!`) 
                             : `${no_length - yes_length}표차로 반대 승리!`}`,
-                        author: { name: `${_interaction.user.username}님의 투표 결과`, iconURL: _interaction.user.displayAvatarURL() },
+                        author: { name: `${author.user.username}님의 투표 결과`, iconURL: author.displayAvatarURL() },
                         fields: [
                             { 
                                 name: `**찬성 [${Object.values(vote.voter).filter(a => a == 0).length}명]**`, 
-                                value: (vote.secret == false) ? get_list(0, (yes_length > no_length) ? true : false) : "⠀",
+                                value: (vote.secret == true) ?  "⠀" : get_list(0, (yes_length > no_length) ? true : false),
                                 inline: true
                             },
                             {
                                 name: `**반대 [${Object.values(vote.voter).filter(a => a == 1).length}명]**`, 
-                                value: (vote.secret == false) ? get_list(1, (no_length > yes_length) ? true : false) : "⠀",
+                                value: (vote.secret == true) ? "⠀" : get_list(1, (no_length > yes_length) ? true : false),
                                 inline: true
                             }
                         ],
-                        description: `■ = 찬성 | □ = 반대 | ${(vote.secret == false) ? "공개투표" : "비밀투표"}\n`
+                        description: `■ = 찬성 | □ = 반대 | ${(vote.secret == true) ? "비밀투표" : "공개투표"}\n`
                             + `${(yes_length + no_length == 0) ? 50 : Math.round(yes_length / all_length * 100)}%⠀`
                             + `${'■'.repeat(yes_bar)}${'□'.repeat(no_bar)}`
                             + `⠀${(yes_length + no_length == 0) ? 50 : Math.round(no_length / all_length * 100)}%`,
-                        color: _interaction.member.displayHexColor,
+                        color: author.displayHexColor,
                         footer: { text: _interaction.guild.name, iconURL: _interaction.guild.iconURL() }
                     })
                     await interaction.editReply({ embeds: [embed], components: [] });
@@ -208,9 +211,9 @@ module.exports = {
                 const vote = data.guilds[interaction.guild.id].votes[i];
                 options[i] = {
                     label: vote.topic,
-                    description: `개최자 : ${interaction.guild.members.cache.get(vote.author).user.tag} | ` 
-                        + `찬성 : ${Object.values(vote.voter).filter(a => a == 0).length}명 | `
-                        + `반대 : ${Object.values(vote.voter).filter(a => a == 1).length}명`,
+                    description: `개최자 : ${interaction.guild.members.cache.get(vote.author).user.tag} |`
+                        + ` 찬성 : ${Object.values(vote.voter).filter(a => a == 0).length}명 |`
+                        + ` 반대 : ${Object.values(vote.voter).filter(a => a == 1).length}명`,
                     value: i.toString()
                 }
             }
