@@ -182,10 +182,10 @@ function change_activity() {
     const target_day = new Date(target.date);
     if (target.type == 0) {
         const days_ago = Math.ceil((today-target_day)/(1000 * 3600 * 24))+1;
-        bot.user.setActivity(`${target.text} ${days_ago}일차`, { type: "WATCHING" });
+        bot.user.setActivity(`${target.text} ${(days_ago == 0) ? "D-Day" : `${days_ago}일차`}`, { type: "WATCHING" });
     } else {
         const days_ago = Math.ceil((target_day-today)/(1000 * 3600 * 24));
-        bot.user.setActivity(`${target.text}까지 ${days_ago}일`, { type: "WATCHING" });
+        bot.user.setActivity(`${target.text}${(days_ago == 0) ? " D-Day" : `까지 ${days_ago}일`}`, { type: "WATCHING" });
     }
 
     if (turn >= dates.length-1) {
