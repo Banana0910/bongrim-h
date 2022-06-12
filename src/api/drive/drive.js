@@ -38,7 +38,7 @@ function json_update(data, a) {
             mimeType: "application/json", 
             body: fs.createReadStream(files[a].path)
         } 
-    }, (err, res) => {
+    }, (err) => {
         if (err) {
             send_log(`[json_update 중 오류] ${err}`);
             return;
