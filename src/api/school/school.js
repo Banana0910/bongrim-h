@@ -49,7 +49,7 @@ function getmeal(year, month, day, sname) {
             const meals = await Promise.all($(".BD_table").map((i, e) => ({
                     name: $(e).find("table > tbody > tr.dietTy_tr > td").text().trim(),
                     meal: $(e).find("table > tbody > tr:nth-child(2) > td").html().trim()
-                        .replace(/\n|[0-9\\.]{2,}/gi, '').replace(/&nbsp;/gi, ' ')
+                        .replace(/\n|[0-9\\.]{2,}/gi, '').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&')
                         .replace(/Ábr\/&gt;/gi, '<br/>').replace(/\(\)/gi, '')
                         .split(/<br\s*[\/]?>/gi).map(m => m.trim()).join('\n'),
                     calorie: $(e).find("table > tbody > tr:nth-child(4) > td").text().trim()
