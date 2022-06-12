@@ -13,7 +13,7 @@ const cheerio = require('cheerio');
 //         const school_data = require("./school_data.json");
 //         const res = await axios.get("https://open.neis.go.kr/hub/mealServiceDietInfo", {
 //             params: {
-//                 KEY: process.env.NEIS_KEY,
+//                 KEY: "f0491ec9a1784e2cb92d2a4070f1392b",
 //                 Type: "json",
 //                 pIndex: 1,
 //                 pSize: 100,
