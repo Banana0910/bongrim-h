@@ -140,7 +140,7 @@ function get_timetable(dayofweek, color, sname) {
     
     const t = data[sname][days[dayofweek]];
     let output = "⠀⠀⠀⠀⠀⠀";
-    t.timetable.map(c => { output += `**${String.fromCharCode(0x2460+c.class-1)}    반**⠀⠀ `; });
+    t.timetable.map(c => { output += `**${String.fromCharCode(0x2460+c.class-1)}반**⠀⠀ `; });
     output += "\n";
     
     for (let i = 0; i < t.count; i++) {
