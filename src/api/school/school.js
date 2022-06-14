@@ -2,63 +2,62 @@ const fs = require('fs');
 const { MessageEmbed } = require('discord.js');
 const axios = require('axios').default;
 const path = require('path');
-const cheerio = require('cheerio');
 
 // 급식 관련
-
-// function getmeal(year, month, day, sname) {
-//     return new Promise(async (resolve, reject) => {
-//         const days = ["일", "월", "화", "수", "목", "금", "토"];
-//         const dayofweek = days[(new Date(parseInt(year), parseInt(month)-1, parseInt(day))).getDay()];
-//         const school_data = require("./school_data.json");
-//         const res = await axios.get("https://open.neis.go.kr/hub/mealServiceDietInfo", {
-//             params: {
-//                 KEY: "f0491ec9a1784e2cb92d2a4070f1392b",
-//                 Type: "json",
-//                 pIndex: 1,
-//                 pSize: 100,
-//                 ATPT_OFCDC_SC_CODE: school_data[sname].sido,
-//                 SD_SCHUL_CODE: school_data[sname].code,
-//                 MLSV_YMD: `${year}${month}${day}`
-//             }
-//         });
-//         if (res.data.RESULT) {
-//             reject((res.data.RESULT.CODE == 'INFO-200') ? "no meal" : res.data.RESULT.MESSAGE);
-//             return;
-//         }
-//         const meals = await Promise.all(res.data.mealServiceDietInfo[1].row.map(meal => ({
-//             name: meal.MMEAL_SC_NM,
-//             meal:  meal.DDISH_NM.replace(/\n|[0-9\\.]{2,}/gi, '').replace(/\(\)/gi, '')
-//                 .split(/<br\s*[\/]?>/gi).map(m => (m.trim())),
-//             calorie: meal.CAL_INFO
-//         })))
-//         resolve({ date: { year, month, day, dayofweek }, meals})
-//     })
-// }
 
 function getmeal(year, month, day, sname) {
     return new Promise(async (resolve, reject) => {
         const days = ["일", "월", "화", "수", "목", "금", "토"];
         const dayofweek = days[(new Date(parseInt(year), parseInt(month)-1, parseInt(day))).getDay()];
         const school_data = require("./school_data.json");
-        axios.get(`http://${school_data[sname].sid}.gne.go.kr/${school_data[sname].sid}/dv/dietView/selectDietDetailView.do`, {
-            params: { dietDate: `${year}${month}${day}` }
-        }).then(async res => {
-            const $ = cheerio.load(res.data);
-            if ($('#subContent > div > div:nth-child(7) > div:nth-child(5) > table > tbody > tr:nth-child(2) > td').text().trim() == "") { reject("no meal"); }
-            const meals = await Promise.all($(".BD_table").map((i, e) => ({
-                    name: $(e).find("table > tbody > tr.dietTy_tr > td").text().trim(),
-                    meal: $(e).find("table > tbody > tr:nth-child(2) > td").html().trim()
-                        .replace(/\n|[0-9\\.]{2,}/gi, '').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&')
-                        .replace(/Ábr\/&gt;/gi, '<br/>').replace(/\(\)/gi, '')
-                        .split(/<br\s*[\/]?>/gi).map(m => m.trim()).join('\n'),
-                    calorie: $(e).find("table > tbody > tr:nth-child(4) > td").text().trim()
-                })
-            ));
-            resolve({ date: { year, month, day, dayofweek }, meals });
-        }).catch(err => reject(err));
-    });
+        const res = await axios.get("https://open.neis.go.kr/hub/mealServiceDietInfo", {
+            params: {
+                KEY: "f0491ec9a1784e2cb92d2a4070f1392b",
+                Type: "json",
+                pIndex: 1,
+                pSize: 100,
+                ATPT_OFCDC_SC_CODE: school_data[sname].sido,
+                SD_SCHUL_CODE: school_data[sname].code,
+                MLSV_YMD: `${year}${month}${day}`
+            }
+        });
+        if (res.data.RESULT) {
+            reject((res.data.RESULT.CODE == 'INFO-200') ? "no meal" : res.data.RESULT.MESSAGE);
+            return;
+        }
+        const meals = await Promise.all(res.data.mealServiceDietInfo[1].row.map(meal => ({
+            name: meal.MMEAL_SC_NM,
+            meal: meal.DDISH_NM.replace(/\n|[0-9\\.]{2,}/gi, '').replace(/\(\)/gi, '')
+                .split(/<br\s*[\/]?>/gi).map(m => (m.trim())),
+            calorie: meal.CAL_INFO
+        })))
+        resolve({ date: { year, month, day, dayofweek }, meals})
+    })
 }
+
+// function getmeal(year, month, day, sname) {
+//     return new Promise(async (resolve, reject) => {
+//         const days = ["일", "월", "화", "수", "목", "금", "토"];
+//         const dayofweek = days[(new Date(parseInt(year), parseInt(month)-1, parseInt(day))).getDay()];
+//         const school_data = require("./school_data.json");
+//         axios.get(`http://${school_data[sname].sid}.gne.go.kr/${school_data[sname].sid}/dv/dietView/selectDietDetailView.do`, {
+//             params: { dietDate: `${year}${month}${day}` }
+//         }).then(async res => {
+//             const $ = cheerio.load(res.data);
+//             if ($('#subContent > div > div:nth-child(7) > div:nth-child(5) > table > tbody > tr:nth-child(2) > td').text().trim() == "") { reject("no meal"); }
+//             const meals = await Promise.all($(".BD_table").map((i, e) => ({
+//                     name: $(e).find("table > tbody > tr.dietTy_tr > td").text().trim(),
+//                     meal: $(e).find("table > tbody > tr:nth-child(2) > td").html().trim()
+//                         .replace(/\n|[0-9\\.]{2,}/gi, '').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&')
+//                         .replace(/Ábr\/&gt;/gi, '<br/>').replace(/\(\)/gi, '')
+//                         .split(/<br\s*[\/]?>/gi).map(m => m.trim()).join('\n'),
+//                     calorie: $(e).find("table > tbody > tr:nth-child(4) > td").text().trim()
+//                 })
+//             ));
+//             resolve({ date: { year, month, day, dayofweek }, meals });
+//         }).catch(err => reject(err));
+//     });
+// }
 
 function gettoday() {
     return new Promise(async (resolve, reject) => {
