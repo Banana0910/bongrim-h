@@ -28,14 +28,14 @@ function getmeal(year, month, day, sname) {
         const meals = await Promise.all(res.data.mealServiceDietInfo[1].row.map(meal => ({
             name: meal.MMEAL_SC_NM,
             meal: meal.DDISH_NM.replace(/\n|[0-9\\.]{2,}/gi, '').replace(/\(\)/gi, '')
-                .split(/<br\s*[\/]?>/gi).map(m => (m.trim())),
+                .split(/<br\s*[\/]?>/gi).map(m => (m.trim())).join('\n'),
             calorie: meal.CAL_INFO
         })))
         resolve({ date: { year, month, day, dayofweek }, meals})
     })
 }
 
-// function getmeal(year, month, day, sname) {
+// function getmeal(year, month, day, sname) { // PageParseVer [dependency : cheerio]
 //     return new Promise(async (resolve, reject) => {
 //         const days = ["일", "월", "화", "수", "목", "금", "토"];
 //         const dayofweek = days[(new Date(parseInt(year), parseInt(month)-1, parseInt(day))).getDay()];
