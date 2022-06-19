@@ -63,7 +63,7 @@ module.exports = {
                 ]
             }
         }
-        let data = require("../data/data.json");
+        let data = require("../data.json");
         if (subcommand == "생성") {
             const topic = interaction.options.getString("주제");
             const secret = interaction.options.getBoolean("비밀투표") || false;
@@ -82,7 +82,7 @@ module.exports = {
             collecter.on('collect', async i => {
                 if (i.customId == `yes${index}`) {
                     i.deferUpdate();
-                    let data = require("../data/data.json");
+                    let data = require("../data.json");
                     if (data.guilds[interaction.guild.id].votes) {
                         if (!data.guilds[interaction.guild.id].votes[index]) 
                             await msg.delete();
@@ -92,7 +92,7 @@ module.exports = {
                     json_update(data, 0);
                 } else if (i.customId == `no${index}`) {
                     i.deferUpdate();
-                    let data = require("../data/data.json");
+                    let data = require("../data.json");
                     if (data.guilds[interaction.guild.id].votes) {
                         if (!data.guilds[interaction.guild.id].votes[index]) 
                             await msg.delete();
@@ -102,7 +102,7 @@ module.exports = {
                     json_update(data, 0);
                 } else if (i.customId == `giveup${index}`) {
                     i.deferUpdate();
-                    let data = require("../data/data.json");
+                    let data = require("../data.json");
                     if (data.guilds[interaction.guild.id].votes) {
                         if (!data.guilds[interaction.guild.id].votes[index]) 
                             await msg.delete();
@@ -237,7 +237,7 @@ module.exports = {
                     collecter.on('collect', async i => {
                         if (i.customId == `yes${index}`) {
                             i.deferUpdate();
-                            let data = require("../data/data.json");
+                            let data = require("../data.json");
                             if (data.guilds[interaction.guild.id].votes) {
                                 if (!data.guilds[interaction.guild.id].votes[index]) 
                                     await msg.delete();
@@ -247,7 +247,7 @@ module.exports = {
                             json_update(data, 0);
                         } else if (i.customId == `no${index}`) {
                             i.deferUpdate();
-                            let data = require("../data/data.json");
+                            let data = require("../data.json");
                             if (data.guilds[interaction.guild.id].votes) {
                                 if (!data.guilds[interaction.guild.id].votes[index]) 
                                     await msg.delete();
@@ -257,7 +257,7 @@ module.exports = {
                             json_update(data, 0);
                         } else if (i.customId == `giveup${index}`) {
                             i.deferUpdate();
-                            let data = require("../data/data.json");
+                            let data = require("../data.json");
                             if (data.guilds[interaction.guild.id].votes) {
                                 if (!data.guilds[interaction.guild.id].votes[index]) 
                                     await msg.delete();

@@ -1,7 +1,7 @@
 // 모듈 정의
 async function send_log(msg) {
     let channels = [];
-    let data = require('./data/data.json');
+    let data = require('./data.json');
     await Promise.all(Object.keys(data.guilds).map((guild) => {
         data.guilds[guild].log_channels.map(channel => channels.push(channel));
     }));
@@ -19,7 +19,7 @@ const fs = require('fs');
 const { json_download, json_update } = require('./api/drive/drive');
 const { Client, Intents, Collection, MessageEmbed } = require('discord.js');
 const { scheduleJob } = require('node-schedule');
-const { token } = require('./data/config.json');
+const { token } = require('./config.json');
 
 const bot = new Client({ 
     intents: [
@@ -33,7 +33,7 @@ const bot = new Client({
 
 function stats_update(guild) {
     try {
-        const data = require('./data/data.json');
+        const data = require('./data.json');
         if (data.guilds[guild.id].stats) {
             const stats = data.guilds[guild.id].stats
             const all_channel = guild.channels.cache.get(stats.all_channel);
@@ -75,7 +75,7 @@ bot.once('ready', async () =>  {
         bot.user.setActivity(`정비`, { type: "PLAYING" });
         // await send_log(`**┌─── [${now.toISOString().split('T')[0]} ${now.toTimeString().split(' ')[0]}] 봇 시작 ───┐**`);
         getinf();
-        let data = require('./data/data.json');
+        let data = require('./data.json');
         await Promise.all(bot.guilds.cache.map((guild) => {
             if (!data.guilds[guild.id])
                 data.guilds[guild.id] = { log_channels: [] };
@@ -128,7 +128,7 @@ bot.on('messageCreate', async (msg) => {
 bot.on('guildMemberAdd', async (member) => {
     stats_update(member.guild);
     try {
-        let data = require('./data/data.json');
+        let data = require('./data.json');
         if (data.guilds[member.guild.id].autorole) {
             const role = data.guilds[member.guild.id].autorole
             const bot_role = member.guild.roles.cache.get(role.bot_role);
@@ -149,13 +149,13 @@ bot.on('guildMemberRemove', async (member) => {
 });
 
 bot.on('guildCreate', async (guild) => {
-    let data = require('./data/data.json');
+    let data = require('./data.json');
     data.guilds[guild.id] = { log_channels: [] }
     json_update(data);
 });
 
 bot.on('guildDelete', async (guild) => {
-    let data = require('./data/data.json');
+    let data = require('./data.json');
     delete data.guilds[guild.id];
 });
 

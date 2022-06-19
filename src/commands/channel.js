@@ -7,7 +7,7 @@ module.exports = {
      * @param {CommandInteraction} interaction
      */
     async execute(interaction) {
-        let data = require('../data/data.json');
+        let data = require('../data.json');
         const group = interaction.options.getSubcommandGroup();
         const channel_id = (interaction.options.getChannel("채널") || interaction.channel).id;
         const guild_id = interaction.guild.id

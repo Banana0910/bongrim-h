@@ -5,7 +5,7 @@ const { send_log } = require('../../index');
 const path = require('path');
 
 const files = [
-    { id: '1aaxNC7KDN-GzJo-rsNtngW04bRCabKJs', path: path.join(__dirname,"..","..","data","data.json") }, // data.json
+    { id: '1aaxNC7KDN-GzJo-rsNtngW04bRCabKJs', path: path.join(__dirname,"..","..","data.json") }, // data.json
     { id: '1T2Tblug5f7IvxyUXIhtXxJLojrQ8GiAl', path: path.join(__dirname,"..","school","school_data.json") }, // school_data.json
     { id: '1E21hlZh4eGhPOd_YpUhaI3l60XLjUiDn', path: path.join(__dirname,"..","school","student_data.json") } // student_data.json
 ];
