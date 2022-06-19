@@ -28,14 +28,14 @@ function getmeal(year, month, day, sname) {
         const meals = await Promise.all(res.data.mealServiceDietInfo[1].row.map(meal => ({
             name: meal.MMEAL_SC_NM,
             meal: meal.DDISH_NM.replace(/\n|[0-9\\.]{2,}/gi, '').replace(/\(\)/gi, '')
-                .split(/<br\s*[\/]?>/gi).map(m => (m.trim())),
+                .split(/<br\s*[\/]?>/gi).map(m => (m.trim())).join('\n'),
             calorie: meal.CAL_INFO
         })))
         resolve({ date: { year, month, day, dayofweek }, meals})
     })
 }
 
-// function getmeal(year, month, day, sname) {
+// function getmeal(year, month, day, sname) { // PageParseVer [dependency : cheerio]
 //     return new Promise(async (resolve, reject) => {
 //         const days = ["일", "월", "화", "수", "목", "금", "토"];
 //         const dayofweek = days[(new Date(parseInt(year), parseInt(month)-1, parseInt(day))).getDay()];
@@ -139,10 +139,10 @@ function get_timetable(dayofweek, color, sname) {
     const t = data[sname][days[dayofweek]];
     let output = "⠀⠀⠀⠀⠀⠀";
     t.timetable.map(c => { output += `**${String.fromCharCode(0x2460+c.class-1)}반**⠀⠀ `; });
-    output += "\n";
+    output = output.substring(0, output.length-3) + '\n';
     
     for (let i = 0; i < t.count; i++) {
-        const splitter = `${'────'.repeat(t.timetable.length+1)}`;
+        const splitter = `${'---------'.repeat(t.timetable.length+1)}`;
         let subject = `**${String.fromCharCode(0x2460+i)}교시**⠀⠀`;
         let teacher = `⠀ ⠀ ⠀ ⠀ `;
         t.timetable.map(c => {
