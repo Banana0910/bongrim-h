@@ -180,7 +180,7 @@ function change_activity() {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const target = dates[turn];
     const target_day = new Date(target.date);
-    const daysAgo = Math.ceil((today-target_day))/(1000 * 3600 * 24);
+    const daysAgo = Math.ceil((today-target_day)/(1000 * 3600 * 24));
     if (daysAgo > 0) {
         bot.user.setActivity(`${target.text} ${daysAgo+1}일차`, { type: "WATCHING" });
     } else if (daysAgo == 0) {
