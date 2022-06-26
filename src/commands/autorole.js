@@ -7,7 +7,7 @@ module.exports = {
      * @param {CommandInteraction} interaction
      */
     async execute(interaction) {
-        let data = require("../data/data.json");
+        let data = require("../data.json");
         const guild = interaction.guild;
         const subcommand = interaction.options.getSubcommand();
         if (subcommand == "활성화") {

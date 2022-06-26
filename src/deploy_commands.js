@@ -75,7 +75,7 @@ guild_ids.map((guild_id) => {
     //             type: 4,
     //         }
     //     ]
-    // }, guild_id).then(console.log);
+    // }).then(console.log);
 
     // client.createCommand({
     //     name: "youtube",
@@ -372,4 +372,17 @@ client.createCommand({
     ]
 })
 
-client.getCommands({}).then(console.log)
+client.createCommand({
+    name: "clean",
+    description: "정해진 횟수만큼 씨부린것들을 삭제합니다.",
+    options: [
+        {
+            name: "양",
+            description: "삭제하고싶은 양",
+            required: true,
+            min_value: 0,
+            max_value: 100,
+            type: 4,
+        }
+    ]
+}).then(console.log);

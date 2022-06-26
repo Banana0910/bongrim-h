@@ -58,7 +58,6 @@ function getmeal(year, month, day, sname) {
 //         }).catch(err => reject(err));
 //     });
 // }
-
 function gettoday() {
     return new Promise(async (resolve, reject) => {
         const datetostring = (date) => {
