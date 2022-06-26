@@ -186,7 +186,7 @@ function change_activity() {
     } else if (daysAgo == 0) {
         bot.user.setActivity(`${target.text} D-Day`, { type: "WATCHING" });
     } else {
-        bot.user.setActivity(`${target.text} 까지 ${Math.abs(daysAgo)}일`, { type: "WATCHING" });
+        bot.user.setActivity(`${target.text}까지 ${Math.abs(daysAgo)}일`, { type: "WATCHING" });
     }
 
     (turn >= dates.length-1) ? (turn = 0) : (turn++);
