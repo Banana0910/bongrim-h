@@ -123,7 +123,7 @@ function meal_embed(data, color, sname) {
 
 // 시간표 관련
 
-function get_timetable(dayofweek, color, sname) {
+function get_timetable(dateStr, dayofweek, color, sname) {
     const days = [null , "월", "화", "수", "목", "금", null];
     const data = require("./timetables.json");
     if (!data[sname]) {
@@ -135,7 +135,22 @@ function get_timetable(dayofweek, color, sname) {
             timestamp: new Date()
         });
     }
-    
+
+    if (data[sname].exams[dateStr]) {
+        const target = data[sname].exam[dateStr];
+        const fields = target.map((s, i) => {
+            i++;
+            return { name: `${i}교시`, value: s }
+        });
+        return new MessageEmbed({
+            author: { name: sname },
+            title: `${days[dayofweek]}요일 시험 시간표`,
+            fields: fields, 
+            color: color,
+            timestamp: new Date()
+        });
+    }
+
     const t = data[sname][days[dayofweek]];
     let output = "⠀⠀⠀⠀⠀⠀";
     t.timetable.map(c => { output += `**${String.fromCharCode(0x2460+c.class-1)}반**⠀⠀ `; });
@@ -162,8 +177,9 @@ function get_timetable(dayofweek, color, sname) {
 
 function timetable_embed(data, color, sname) {
     if (data) {
-        const date = new Date(`${data.date.year}-${data.date.month}-${data.date.day}`);
-        return get_timetable(date.getDay(), color, sname);
+        const dateStr = `${data.date.year}-${data.date.month}-${data.date.day}`;
+        const date = new Date(dateStr);
+        return get_timetable(dateStr, date.getDay(), color, sname);
     }
     return new MessageEmbed({ author: { name: sname }, title: `이런..`, description: "시간표가 없습니다", color: color, timestamp: new Date()});
 }

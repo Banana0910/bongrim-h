@@ -14,6 +14,6 @@ module.exports = {
             return;
         }
         const dayofweek = interaction.options.getInteger("요일");
-        await interaction.reply({ embeds: [get_timetable(dayofweek, interaction.guild.me.displayHexColor, student_data[interaction.user.id])] });
+        await interaction.reply({ embeds: [get_timetable(null, dayofweek, interaction.guild.me.displayHexColor, student_data[interaction.user.id])] });
     }
 }
